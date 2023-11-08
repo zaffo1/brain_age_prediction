@@ -68,6 +68,35 @@ def create_model(input_neurons, hidden_neurons, hidden_layers):
     return model
 
 
+def create_functional_model(input_neurons, hidden_neurons, hidden_layers):
+    '''
+    create (and compile) our model
+    in order to do model selection, it takes in input 3 hyperparameters:
+    - the number of input neurons,
+    - the number of hidden neurons,
+    - the number of hiddenlayers.
+
+    it returns the compiled model using MAE as loss, and Adam with lr=0.001 as optimizer
+    '''
+    model = Sequential()
+    model.add(Dense(input_neurons, input_shape=(5253,), activation='relu',kernel_regularizer=l1(0.01)))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+
+    for i in range(hidden_layers):
+        model.add(Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01)))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
+
+    model.add(Dense(1, activation='linear'))
+
+    #compile model
+    optim = Adam(learning_rate=0.001)
+    model.compile(loss='mae', optimizer=optim)
+    return model
+
+
+
 def line(x, a, b):
     '''
     model of a line
