@@ -66,3 +66,10 @@ def create_model(input_neurons, hidden_neurons, hidden_layers):
     optim = Adam(learning_rate=0.001)
     model.compile(loss='mae', optimizer=optim)
     return model
+
+
+def line(x, a, b):
+    '''
+    model of a line
+    '''
+    return a*x +b

@@ -34,9 +34,9 @@ if __name__ == "__main__":
     model = KerasRegressor(model=create_model, verbose=0)
 
     # define search space
-    input_neurons = [50]
-    hidden_neurons = [20]
-    hidden_layers = [1]
+    input_neurons = [20,50,100]
+    hidden_neurons = [20,50,100]
+    hidden_layers = [1,2,3]
 
     param_grid = {'model__input_neurons': input_neurons,
                     'model__hidden_neurons': hidden_neurons,
@@ -48,9 +48,9 @@ if __name__ == "__main__":
                     n_jobs=1,
                     scoring='neg_mean_absolute_error',
                     cv=k_fold,
-                    verbose=0)
+                    verbose=3)
 
-    grid_result = search.fit(X_train, y_train, epochs = 10, verbose = 0)
+    grid_result = search.fit(X_train, y_train, epochs = 100, verbose = 0)
 
     print(f'Best: {grid_result.best_score_} using {grid_result.best_params_}')
     means = grid_result.cv_results_['mean_test_score']
