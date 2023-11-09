@@ -40,7 +40,7 @@ def preprocessing(df):
 
     return features
 
-def create_model(input_neurons, hidden_neurons, hidden_layers):
+def create_structural_model(input_neurons, hidden_neurons, hidden_layers):
     '''
     create (and compile) our model
     in order to do model selection, it takes in input 3 hyperparameters:
