@@ -22,9 +22,9 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False):
                           hidden_neurons=best_hyperparams['model__hidden_neurons'],
                           hidden_layers=best_hyperparams['model__hidden_layers'])
     model.summary()
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=10, min_lr=0.0001)
-    early_stopping = EarlyStopping(monitor='val_loss', patience=30, verbose=1)
-    MAX_EPOCHS = 500
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=10, min_lr=0.00001)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=50, verbose=1)
+    MAX_EPOCHS = 1000
     train=model.fit(X_train,
                     y_train,
                     epochs=MAX_EPOCHS,
@@ -58,7 +58,10 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False):
     import matplotlib.pyplot as plt
     plt.plot(train.history['loss'], label='train')
     plt.plot(train.history['val_loss'], label='test')
-    plt.title('Model Loss')
+    if structural:
+        plt.title('Structural Model')
+    if functional:
+        plt.title('Functional Model')
     plt.xlabel('epochs')
     plt.ylabel('loss values')
     plt.legend(loc='upper right')
@@ -69,9 +72,9 @@ if __name__ == "__main__":
     from sklearn.model_selection import train_test_split
     SEED = 7 #for reproducibility
 
-    if 0:
+    if 1:
         #structural model
-        print('--------FUNCTIONAL MODEL---------')
+        print('--------STRUCTURAL MODEL---------')
 
         df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
 
