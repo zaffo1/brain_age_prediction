@@ -59,7 +59,7 @@ if __name__ == "__main__":
     import numpy as np
     import os
 
-    if 1:
+    if 0:
         #structural model
         print('--------STRUCTURAL MODEL---------')
         df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')

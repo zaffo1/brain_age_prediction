@@ -2,8 +2,12 @@ from useful_functions import load_dataset, preprocessing, create_functional_mode
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 import os
 import pickle
+import matplotlib.pyplot as plt
+
 def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False):
-     #re-train the model using all available data.
+    '''
+    Re-train the best model obtained throug model selection using all available data.
+    '''
 
     if structural:
         filename = 'structural_model_hyperparams.pkl'
@@ -19,12 +23,13 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False):
 
 
     model = create_model(input_neurons=best_hyperparams['model__input_neurons'],
-                          hidden_neurons=best_hyperparams['model__hidden_neurons'],
-                          hidden_layers=best_hyperparams['model__hidden_layers'])
+                         hidden_neurons=best_hyperparams['model__hidden_neurons'],
+                         hidden_layers=best_hyperparams['model__hidden_layers'])
     model.summary()
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=10, min_lr=0.00001)
     early_stopping = EarlyStopping(monitor='val_loss', patience=50, verbose=1)
     MAX_EPOCHS = 1000
+
     train=model.fit(X_train,
                     y_train,
                     epochs=MAX_EPOCHS,
@@ -53,9 +58,7 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False):
     model.save_weights(os.path.join('saved_models',h5_name))
     print("Saved model to disk")
 
-
     # plot loss during training
-    import matplotlib.pyplot as plt
     plt.plot(train.history['loss'], label='train')
     plt.plot(train.history['val_loss'], label='test')
     if structural:

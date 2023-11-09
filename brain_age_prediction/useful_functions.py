@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import RobustScaler
 
-from keras.models import Sequential
-from keras.layers import Dense,Dropout,BatchNormalization
+from keras.models import Sequential, Model
+from keras.layers import Dense,Dropout,BatchNormalization, concatenate
 from keras.regularizers import l1
 from keras.optimizers.legacy import Adam
+
 
 def load_dataset(dataset_name):
     '''
@@ -94,6 +95,47 @@ def create_functional_model(input_neurons, hidden_neurons, hidden_layers):
     optim = Adam(learning_rate=0.001)
     model.compile(loss='mae', optimizer=optim)
     return model
+
+
+
+
+def create_joint_model(hidden_neurons, hidden_layers):
+    # create model
+    model_f = Sequential()
+    model_f.add(Dense(100, input_shape=(5253,), activation='relu',kernel_regularizer=l1(0.01)))
+    model_f.add(Dropout(0.5))
+    model_f.add(BatchNormalization())
+    model_f.add(Dense(100, activation='relu',kernel_regularizer=l1(0.01)))
+    model_f.add(Dropout(0.2))
+    model_f.add(BatchNormalization())
+
+
+    model_s = Sequential()
+    model_s.add(Dense(50, input_shape=(221,), activation='relu',kernel_regularizer=l1(0.01)))
+    model_s.add(Dropout(0.5))
+    model_s.add(BatchNormalization())
+    model_s.add(Dense(20, activation='relu',kernel_regularizer=l1(0.01)))
+    model_s.add(Dropout(0.2))
+    model_s.add(BatchNormalization())
+
+    model_concat = concatenate([model_f.output, model_s.output], axis=-1)
+
+    for i in range(hidden_layers):
+        model_concat = Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_concat)
+        model_concat = Dropout(0.2)(model_concat)
+        model_concat = BatchNormalization()(model_concat)
+
+    model_concat = Dense(1, activation='linear',kernel_regularizer=l1(0.01))(model_concat)
+
+    model = Model(inputs=[model_f.input, model_s.input], outputs=model_concat)
+
+
+    #compile the model
+    optim = Adam(learning_rate=0.01)
+    model.compile(loss='mae', optimizer=optim)
+
+    return model
+
 
 
 
