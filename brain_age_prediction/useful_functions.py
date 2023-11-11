@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.preprocessing import RobustScaler
 
 from keras.models import Sequential, Model
-from keras.layers import Dense,Dropout,BatchNormalization, concatenate
+from keras.layers import Input, Dense,Dropout,BatchNormalization, concatenate
 from keras.regularizers import l1
 from keras.optimizers.legacy import Adam
 
@@ -41,7 +41,7 @@ def preprocessing(df):
 
     return features
 
-def create_structural_model(input_neurons, hidden_neurons, hidden_layers):
+def create_structural_model(dropout, hidden_neurons, hidden_layers):
     '''
     create (and compile) our model
     in order to do model selection, it takes in input 3 hyperparameters:
@@ -52,13 +52,13 @@ def create_structural_model(input_neurons, hidden_neurons, hidden_layers):
     it returns the compiled model using MAE as loss, and Adam with lr=0.001 as optimizer
     '''
     model = Sequential()
-    model.add(Dense(input_neurons, input_shape=(221,), activation='relu',kernel_regularizer=l1(0.01)))
-    model.add(Dropout(0.5))
+    model.add(Input(shape=(221,)))
+    model.add(Dropout(dropout))
     model.add(BatchNormalization())
 
     for i in range(hidden_layers):
         model.add(Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01)))
-        model.add(Dropout(0.2))
+        model.add(Dropout(dropout))
         model.add(BatchNormalization())
 
     model.add(Dense(1, activation='linear'))
@@ -69,7 +69,7 @@ def create_structural_model(input_neurons, hidden_neurons, hidden_layers):
     return model
 
 
-def create_functional_model(input_neurons, hidden_neurons, hidden_layers):
+def create_functional_model(dropout, hidden_neurons, hidden_layers):
     '''
     create (and compile) our model
     in order to do model selection, it takes in input 3 hyperparameters:
@@ -80,13 +80,13 @@ def create_functional_model(input_neurons, hidden_neurons, hidden_layers):
     it returns the compiled model using MAE as loss, and Adam with lr=0.001 as optimizer
     '''
     model = Sequential()
-    model.add(Dense(input_neurons, input_shape=(5253,), activation='relu',kernel_regularizer=l1(0.01)))
-    model.add(Dropout(0.5))
+    model.add(Input(shape=(5253,)))
+    model.add(Dropout(dropout))
     model.add(BatchNormalization())
 
     for i in range(hidden_layers):
         model.add(Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01)))
-        model.add(Dropout(0.2))
+        model.add(Dropout(dropout))
         model.add(BatchNormalization())
 
     model.add(Dense(1, activation='linear'))

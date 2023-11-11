@@ -97,9 +97,9 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
     plt.plot(x,x, color = 'grey', linestyle='--',label='perfect regression')
     plt.legend()
     if structural:
-        plt.savefig('plots/age_regression_functional_model.pdf')
-    if functional:
         plt.savefig('plots/age_regression_structural_model.pdf')
+    if functional:
+        plt.savefig('plots/age_regression_functional_model.pdf')
 
     pad_c = ((y_pred_asd.ravel()-b)/a) - y_asd
     print(f'PAD_c for ASD = {pad_c.mean()} (std = {pad_c.std()})')

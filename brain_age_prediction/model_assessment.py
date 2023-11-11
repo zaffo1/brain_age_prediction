@@ -22,7 +22,7 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False):
         best_hyperparams = pickle.load(fp)
 
 
-    model = create_model(input_neurons=best_hyperparams['model__input_neurons'],
+    model = create_model(dropout=best_hyperparams['model__dropout'],
                          hidden_neurons=best_hyperparams['model__hidden_neurons'],
                          hidden_layers=best_hyperparams['model__hidden_layers'])
     model.summary()
@@ -68,6 +68,11 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False):
     plt.xlabel('epochs')
     plt.ylabel('loss values')
     plt.legend(loc='upper right')
+
+    if structural:
+        plt.savefig('plots/loss_structural_model.pdf')
+    if functional:
+        plt.savefig('plots/loss_functional_model.pdf')
     plt.show()
 
 if __name__ == "__main__":

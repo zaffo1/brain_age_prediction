@@ -22,11 +22,11 @@ def model_selection(search_space, X_train,y_train,N_FOLDS=5,SEED=7,functional=Fa
         filename = 'functional_model_hyperparams.pkl'
 
     # define search space
-    input_neurons = search_space[0]
+    dropout = search_space[0]
     hidden_neurons = search_space[1]
     hidden_layers = search_space[2]
 
-    param_grid = {'model__input_neurons': input_neurons,
+    param_grid = {'model__dropout': dropout,
                     'model__hidden_neurons': hidden_neurons,
                     'model__hidden_layers': hidden_layers}
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     import numpy as np
     import os
 
-    if 0:
+    if 1:
         #structural model
         print('--------STRUCTURAL MODEL---------')
         df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
@@ -74,11 +74,11 @@ if __name__ == "__main__":
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
                                                             random_state=SEED)
 
-        search = [[20,50,100],[20,50,100],[1,2,3]]
+        search = [[0.2,0.5],[10,20,30,50],[1,2,3,4,5]]
         model_selection(structural=True, search_space=search,X_train=X_train,y_train=y_train)
 
 
-    if 1:
+    if 0:
         #functional model
         print('--------FUNCTIONAL MODEL---------')
 
@@ -94,5 +94,5 @@ if __name__ == "__main__":
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
                                                             random_state=SEED)
 
-        search = [[100,200,500],[100,200,500],[1,2,3]]
+        search = [[0.2,0.5],[100,200,500],[1,2,3]]
         model_selection(functional=True, search_space=search,X_train=X_train,y_train=y_train)
