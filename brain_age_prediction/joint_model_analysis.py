@@ -62,7 +62,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd):
     a, b = popt
     print(f'a = {popt[0]}, b={popt[1]}')
 
-    plt.scatter(y_test,y_pred)
+    plt.scatter(y_test,y_pred, color='b')
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.plot(x,line(x,a,b), color = 'red', linestyle='--')
@@ -83,7 +83,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd):
     r_td, _ = pearsonr(y_test,y_pred.ravel())
     r_asd, _ = pearsonr(y_asd,y_pred_asd.ravel())
 
-    plt.figure(2, figsize=(20,10))
+    plt.figure(2)
     plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
     plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5, label=f'ASD, r={r_asd:.2}')
     plt.title('Joint Model')

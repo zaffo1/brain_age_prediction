@@ -52,11 +52,19 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
 
     #evalueate model
     score = model.evaluate(X_test, y_test, verbose=0)
-    print(f'TEST MAE = {score}')
+    print(f'TD TEST MAE = {score}')
 
     y_pred = model.predict(X_test)
-    plt.figure(1)
-    plt.scatter(y_test,y_pred)
+    plt.figure(1, figsize=[10,5])
+    plt.subplot(121)
+    if structural:
+        plt.suptitle('Structural Model')
+    if functional:
+        plt.suptitle('Functional Model')
+
+    r_td, _ = pearsonr(y_test,y_pred.ravel())
+
+    plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
 
@@ -64,11 +72,16 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
     a, b = popt
     print(f'a = {popt[0]}, b={popt[1]}')
 
-    plt.scatter(y_test,y_pred)
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
-    plt.plot(x,line(x,a,b), color = 'red', linestyle='--')
+    plt.plot(x,line(x,a,b), color = 'red', linestyle='--', label='fit')
 
+    plt.title(f'TD Group (Test) - MAE = {score:.2}')
+
+    plt.xlabel('Actual Age [years]')
+    plt.ylabel('Predicted Age [years]')
+
+    plt.legend()
     #predicted age difference (corrected)
     pad_c = ((y_pred.ravel()-b)/a) - y_test
     print(f'PAD_c for TD (test set) = {pad_c.mean()} (std {pad_c.std()})')
@@ -79,22 +92,23 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
     y_asd = np.array(df_asd['AGE_AT_SCAN'])
     y_pred_asd = model.predict(X_asd)
 
-    r_td, _ = pearsonr(y_test,y_pred.ravel())
+    score_asd = model.evaluate(X_asd, y_asd, verbose=0)
+    print(f'ASD MAE = {score_asd}')
+
     r_asd, _ = pearsonr(y_asd,y_pred_asd.ravel())
 
-    plt.figure(2, figsize=(20,10))
-    plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
+    #plt.figure(2)
+    plt.subplot(122)
+
+    #plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
     plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5, label=f'ASD, r={r_asd:.2}')
-    if structural:
-        plt.title('Structural Model')
-    if functional:
-        plt.title('Functional Model')
+    plt.title(f'ASD Group - MAE = {score_asd:.2}')
 
     plt.xlabel('Actual Age [years]')
     plt.ylabel('Predicted Age [years]')
 
     x = np.linspace(min(y_asd),max(y_asd),1000)
-    plt.plot(x,x, color = 'grey', linestyle='--',label='perfect regression')
+    plt.plot(x,x, color = 'grey', linestyle='--')
     plt.legend()
     if structural:
         plt.savefig('plots/age_regression_structural_model.pdf')
