@@ -8,6 +8,14 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import os
 
+
+def age_correction(a,b,cron, pred):
+    '''
+    returns the corrected age using the de Lange method
+    '''
+    return pred + (cron-(a*cron+b))
+
+
 def load_model(structural=False,functional=False):
     '''
     Load a saved keras model, and compile it
@@ -64,7 +72,7 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
 
     r_td, _ = pearsonr(y_test,y_pred.ravel())
 
-    plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
+    plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}, mae = {score:.3}')
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
 
@@ -76,7 +84,14 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.plot(x,line(x,a,b), color = 'red', linestyle='--', label='fit')
 
-    plt.title(f'TD Group (Test) - MAE = {score:.2}')
+    y_correct = age_correction(a,b,cron=y_test,pred=y_pred.ravel())
+    r_td_correct, _ = pearsonr(y_test,y_correct.ravel())
+    score_correct = model.evaluate(X_test, y_correct, verbose=0)
+
+    plt.scatter(y_test,y_correct, color='green', alpha=0.7, label=f'Corrected TD, r={r_td_correct:.2},  mae = {score_correct:.3}')
+
+
+    plt.title(f'TD Group (Test) - MAE = {score:.3} years')
 
     plt.xlabel('Actual Age [years]')
     plt.ylabel('Predicted Age [years]')
@@ -101,8 +116,19 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
     plt.subplot(122)
 
     #plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
-    plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5, label=f'ASD, r={r_asd:.2}')
-    plt.title(f'ASD Group - MAE = {score_asd:.2}')
+    plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5, label=f'ASD, r={r_asd:.2},  mae = {score_asd:.3}')
+
+
+
+    y_correct_asd = age_correction(a,b,cron=y_asd,pred=y_pred_asd.ravel())
+    r_asd_correct, _ = pearsonr(y_asd,y_correct_asd.ravel())
+    score_correct_asd = model.evaluate(X_asd, y_correct_asd, verbose=0)
+    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'Corrected ASD, r={r_asd_correct:.2},  mae = {score_correct_asd:.3}')
+
+
+
+
+    plt.title(f'ASD Group - MAE = {score_asd:.3} years')
 
     plt.xlabel('Actual Age [years]')
     plt.ylabel('Predicted Age [years]')
