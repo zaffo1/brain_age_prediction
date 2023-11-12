@@ -61,45 +61,53 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
     #evalueate model
     score = model.evaluate(X_test, y_test, verbose=0)
     print(f'TD TEST MAE = {score}')
-
     y_pred = model.predict(X_test)
-    plt.figure(1, figsize=[10,5])
-    plt.subplot(121)
+    r_td, _ = pearsonr(y_test,y_pred.ravel())
+
+    plt.figure(1, figsize=[12,5])
     if structural:
         plt.suptitle('Structural Model')
     if functional:
         plt.suptitle('Functional Model')
+    plt.subplot(121)
+    plt.title('TD')
 
-    r_td, _ = pearsonr(y_test,y_pred.ravel())
-
-    plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}, mae = {score:.3}')
+    plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'r={r_td:.2}\nMAE = {score:.3} years')
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
 
+    #fit
     popt, pcov = curve_fit(line, y_test, y_pred.ravel())
     a, b = popt
     print(f'a = {popt[0]}, b={popt[1]}')
 
-    x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
-    plt.plot(x,line(x,a,b), color = 'red', linestyle='--', label='fit')
+    plt.plot(x,line(x,a,b), color = 'red', linestyle='-', label=f'fit ($\\alpha$ = {a:.2}, $\\beta$ = {b:.2})')
+    plt.xlabel('Chronological Age [years]')
+    plt.ylabel('Predicted Age [years]')
+    plt.legend()
+    plt.subplot(122)
 
+    plt.title('TD (Corrected)')
     y_correct = age_correction(a,b,cron=y_test,pred=y_pred.ravel())
     r_td_correct, _ = pearsonr(y_test,y_correct.ravel())
     score_correct = model.evaluate(X_test, y_correct, verbose=0)
 
-    plt.scatter(y_test,y_correct, color='green', alpha=0.7, label=f'Corrected TD, r={r_td_correct:.2},  mae = {score_correct:.3}')
+    #predicted age difference (corrected)
+    pad_c = y_correct - y_test
+    print(f'PAD_c for TD (test set) = {pad_c.mean()} (std {pad_c.std()})')
 
-
-    plt.title(f'TD Group (Test) - MAE = {score:.3} years')
-
-    plt.xlabel('Actual Age [years]')
-    plt.ylabel('Predicted Age [years]')
+    plt.scatter(y_test,y_correct, color='green', alpha=0.7, label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years\nPAD = {pad_c.mean():.2} years')
+    plt.plot(x,x, color = 'grey', linestyle='--')
+    plt.xlabel('Chronological Age [years]')
+    plt.ylabel('Predicted Age (corrected) [years]')
 
     plt.legend()
-    #predicted age difference (corrected)
-    pad_c = ((y_pred.ravel()-b)/a) - y_test
-    print(f'PAD_c for TD (test set) = {pad_c.mean()} (std {pad_c.std()})')
+    if structural:
+        plt.savefig('plots/td_structural_model.pdf')
+    if functional:
+        plt.savefig('plots/td_functional_model.pdf')
+
 
 
     #ASD
@@ -112,37 +120,42 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
 
     r_asd, _ = pearsonr(y_asd,y_pred_asd.ravel())
 
-    #plt.figure(2)
-    plt.subplot(122)
-
+    plt.figure(2, figsize=[12,5])
+    if structural:
+        plt.suptitle('Structural Model')
+    if functional:
+        plt.suptitle('Functional Model')
+    plt.subplot(121)
+    plt.title('ASD')
     #plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
-    plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5, label=f'ASD, r={r_asd:.2},  mae = {score_asd:.3}')
-
+    plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5, label=f'r={r_asd:.2}\nMAE = {score_asd:.3} years')
+    plt.plot(x,x, color = 'grey', linestyle='--')
 
 
     y_correct_asd = age_correction(a,b,cron=y_asd,pred=y_pred_asd.ravel())
     r_asd_correct, _ = pearsonr(y_asd,y_correct_asd.ravel())
     score_correct_asd = model.evaluate(X_asd, y_correct_asd, verbose=0)
-    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'Corrected ASD, r={r_asd_correct:.2},  mae = {score_correct_asd:.3}')
-
-
-
-
-    plt.title(f'ASD Group - MAE = {score_asd:.3} years')
-
-    plt.xlabel('Actual Age [years]')
-    plt.ylabel('Predicted Age [years]')
-
-    x = np.linspace(min(y_asd),max(y_asd),1000)
-    plt.plot(x,x, color = 'grey', linestyle='--')
-    plt.legend()
-    if structural:
-        plt.savefig('plots/age_regression_structural_model.pdf')
-    if functional:
-        plt.savefig('plots/age_regression_functional_model.pdf')
-
     pad_c = ((y_pred_asd.ravel()-b)/a) - y_asd
     print(f'PAD_c for ASD = {pad_c.mean()} (std = {pad_c.std()})')
+    plt.xlabel('Chronological Age [years]')
+    plt.ylabel('Predicted Age [years]')
+    plt.legend()
+
+    plt.subplot(122)
+    plt.title('ASD (Corrected)')
+
+    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'r={r_asd_correct:.2},\nMAE = {score_correct_asd:.3} years\nPAD = {pad_c.mean():.2} years')
+    plt.plot(x,x, color = 'grey', linestyle='--')
+
+    plt.xlabel('Chronological Age [years]')
+    plt.ylabel('Predicted Age (corrected) [years]')
+
+    plt.legend()
+    if structural:
+        plt.savefig('plots/asd_structural_model.pdf')
+    if functional:
+        plt.savefig('plots/asd_functional_model.pdf')
+
     plt.show()
 
 
