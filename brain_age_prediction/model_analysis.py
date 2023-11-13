@@ -16,7 +16,7 @@ def age_correction(a,b,cron, pred):
     return pred + (cron-(a*cron+b))
 
 
-def load_model(structural=False,functional=False):
+def load_model(structural=False,functional=False, joint=False):
     '''
     Load a saved keras model, and compile it
     return the compiled model
@@ -28,6 +28,11 @@ def load_model(structural=False,functional=False):
     if functional:
         json_name = 'functional_model.json'
         h5_name   = 'functional_model_weights.h5'
+
+    if joint:
+        json_name = 'joint_model.json'
+        h5_name   = 'joint_model_weights.h5'
+
 
     # load json and create model
     json_file         = open(os.path.join('saved_models',json_name), 'r')
@@ -43,20 +48,31 @@ def load_model(structural=False,functional=False):
     return model
 
 
-def model_analysis(model,df_td,df_asd,structural=False,functional=False):
+def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,functional=False,joint=False):
     '''
     function that performs an analysis of the results obtained using the
     regression models obtained.
     In particular: ..........
     '''
 
-    X = preprocessing(df_td)
-    y = np.array(df_td['AGE_AT_SCAN'])
+    X_s = preprocessing(df_s_td)
+    X_f = preprocessing(df_f_td)
 
-    # shuffle and split training and test sets
-    SEED = 7 #for reproducibility
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-                                                    random_state=SEED)
+    y = np.array(df_s_td['AGE_AT_SCAN'])
+
+    SEED = 7
+    X_f_train, X_f_test, X_s_train, X_s_test, y_train, y_test = train_test_split(
+        X_f,X_s, y, test_size=0.3, random_state=SEED)
+
+    if structural:
+        X_test = X_s_test
+
+    if functional:
+        X_test = X_f_test
+
+    if joint:
+        X_test = [X_f_test,X_s_test]
+
 
     #evalueate model
     score = model.evaluate(X_test, y_test, verbose=0)
@@ -69,6 +85,9 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
         plt.suptitle('Structural Model')
     if functional:
         plt.suptitle('Functional Model')
+    if joint:
+        plt.suptitle('Joint Model')
+
     plt.subplot(121)
     plt.title('TD')
 
@@ -107,12 +126,21 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
         plt.savefig('plots/td_structural_model.pdf')
     if functional:
         plt.savefig('plots/td_functional_model.pdf')
-
+    if joint:
+        plt.savefig('plots/td_joint_model.pdf')
 
 
     #ASD
-    X_asd = preprocessing(df_asd)
-    y_asd = np.array(df_asd['AGE_AT_SCAN'])
+
+    if structural:
+        X_asd = preprocessing(df_s_asd)
+    if functional:
+        X_asd = preprocessing(df_f_asd)
+    if joint:
+        X_asd = [preprocessing(df_f_asd),preprocessing(df_s_asd)]
+
+
+    y_asd = np.array(df_s_asd['AGE_AT_SCAN'])
     y_pred_asd = model.predict(X_asd)
 
     score_asd = model.evaluate(X_asd, y_asd, verbose=0)
@@ -125,6 +153,9 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
         plt.suptitle('Structural Model')
     if functional:
         plt.suptitle('Functional Model')
+    if joint:
+        plt.suptitle('Joint Model')
+
     plt.subplot(121)
     plt.title('ASD')
     #plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
@@ -155,6 +186,8 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
         plt.savefig('plots/asd_structural_model.pdf')
     if functional:
         plt.savefig('plots/asd_functional_model.pdf')
+    if joint:
+        plt.savefig('plots/asd_functional_model.pdf')
 
     plt.show()
 
@@ -162,17 +195,25 @@ def model_analysis(model,df_td,df_asd,structural=False,functional=False):
 
 
 if __name__ == "__main__":
-
-    #structural model
-    print('--------STRUCTURAL MODEL---------')
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
-    model             = load_model(structural=True)
-
-    model_analysis(model=model,df_td=df_s_td,df_asd=df_s_asd,structural=True)
-
-    #functional model
-    print('--------FUNCTIONAL MODEL---------')
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
-    model             = load_model(functional=True)
 
-    model_analysis(model=model,df_td=df_f_td,df_asd=df_f_asd, functional=True)
+    if 0:
+        #structural model
+        print('--------STRUCTURAL MODEL---------')
+        model             = load_model(structural=True)
+
+        model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=True)
+
+        #functional model
+        print('--------FUNCTIONAL MODEL---------')
+        model             = load_model(functional=True)
+
+        model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, functional=True)
+
+    #joint model
+    print('--------JOINT MODEL---------')
+    model             = load_model(joint=True)
+    from keras.utils import plot_model
+    plot_model(model, "prova.png", show_shapes=True)
+    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, joint=True)
