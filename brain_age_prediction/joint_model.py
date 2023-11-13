@@ -48,6 +48,7 @@ def join_models(model_f,model_s,hidden_units):
     model_concat = Dropout(0.2)(model_concat)
     model_concat = BatchNormalization()(model_concat)
 
+
     model_concat = Dense(1, activation='linear',kernel_regularizer=l1(0.01))(model_concat)
 
     model = Model(inputs=[model_f.input, model_s.input], outputs=model_concat)
@@ -127,7 +128,7 @@ if __name__ == "__main__":
     model_f = load_model(functional=True)
 
     #join the two models and create a joint model:
-    HIDDEN_UNITS = 50
+    HIDDEN_UNITS = 5
     model = join_models(model_f=model_f, model_s=model_s, hidden_units=HIDDEN_UNITS)
 
     #plot the model architecture

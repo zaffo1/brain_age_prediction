@@ -10,6 +10,30 @@ import os
 
 SEED = 7
 
+
+def permutation_test(x,y,permutation_number=1000):
+    '''
+    returns correlation and p-value
+    '''
+    r = pearsonr(x,y)[0]
+    #Copy one of the features:
+    x_s = np.copy(x)
+    #Initialize variables:
+    permuted_r = []
+    #Number of permutations:
+    p=permutation_number
+    #Initialize permutation loop:
+    for i in range(0,p):
+    #Shuffle one of the features:
+        np.random.shuffle(x_s)
+        #Computed permuted correlations and store them in pR:
+        permuted_r.append(pearsonr(x_s,y)[0])
+
+    #Significance:
+    p_val = len(np.where(np.abs(permuted_r)>=np.abs(r))[0])/p
+    return r, p_val
+
+
 def age_correction(a,b,cron, pred):
     '''
     returns the corrected age using the de Lange method
@@ -78,7 +102,9 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     score = model.evaluate(X_test, y_test, verbose=0)
     print(f'TD TEST MAE = {score}')
     y_pred = model.predict(X_test)
-    r_td, _ = pearsonr(y_test,y_pred.ravel())
+
+    r_td, p_td =permutation_test(y_test,y_pred.ravel())
+    print(f'r = {r_td} (p={p_td})')
 
     plt.figure(1, figsize=[12,5])
     if structural:
@@ -109,7 +135,11 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
 
     plt.title('TD (Corrected)')
     y_correct = age_correction(a,b,cron=y_test,pred=y_pred.ravel())
-    r_td_correct, _ = pearsonr(y_test,y_correct.ravel())
+
+    r_td_correct, p_td_correct =permutation_test(y_test,y_correct.ravel())
+    print(f'r = {r_td_correct} (p={p_td_correct})')
+
+
     score_correct = model.evaluate(X_test, y_correct, verbose=0)
 
     #predicted age difference (corrected)
@@ -146,7 +176,8 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     score_asd = model.evaluate(X_asd, y_asd, verbose=0)
     print(f'ASD MAE = {score_asd}')
 
-    r_asd, _ = pearsonr(y_asd,y_pred_asd.ravel())
+    r_asd, p_asd =permutation_test(y_asd,y_pred_asd.ravel())
+    print(f'r = {r_asd} (p={p_asd})')
 
     plt.figure(2, figsize=[12,5])
     if structural:
@@ -164,7 +195,9 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
 
 
     y_correct_asd = age_correction(a,b,cron=y_asd,pred=y_pred_asd.ravel())
-    r_asd_correct, _ = pearsonr(y_asd,y_correct_asd.ravel())
+    r_asd_correct, p_asd_correct =permutation_test(y_asd,y_correct_asd.ravel())
+    print(f'r = {r_asd_correct} (p={p_asd_correct})')
+
     score_correct_asd = model.evaluate(X_asd, y_correct_asd, verbose=0)
     pad_c = ((y_pred_asd.ravel()-b)/a) - y_asd
     print(f'PAD_c for ASD = {pad_c.mean()} (std = {pad_c.std()})')
