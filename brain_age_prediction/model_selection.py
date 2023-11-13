@@ -9,10 +9,19 @@ SEED = 7 #fixed for reproducibility
 
 def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,structural=False):
     '''
-    function that perform k-fold cross validation in order to do model selection,
+    function that performs k-fold cross validation in order to do model selection using grid search,
     in particular, the parameters are:
-    .........................
+
+    search_space: a list of lists that defines the combination of possible hyperparameters
+    X_train: input features
+    y_train: targets
+    n_folds: number of folds of the k-fold cross validarion (default=5)
+    functional: if True, consider the functional model (default=False)
+    structural: if True, consider the structural model (default=False)
+
+    Finally, the function saves to file the optial hyperparameters found
     '''
+
     k_fold = KFold(n_splits=n_folds, shuffle=True, random_state=SEED)
 
     if structural:
@@ -38,6 +47,7 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
 
     grid_result = grid_search.fit(X_train, y_train, epochs = 100, verbose = 0)
 
+    #print the results of the grid search:
     print(f'Best: {grid_result.best_score_} using {grid_result.best_params_}')
     means = grid_result.cv_results_['mean_test_score']
     stds = grid_result.cv_results_['std_test_score']
@@ -60,7 +70,7 @@ if __name__ == "__main__":
     from sklearn.model_selection import train_test_split
 
     #structural model
-    print('--------STRUCTURAL MODEL---------')
+    print('--------STRUCTURAL MODEL--------')
     #load structutal dataset
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
 
@@ -82,7 +92,7 @@ if __name__ == "__main__":
 
 
     #functional model
-    print('--------FUNCTIONAL MODEL---------')
+    print('--------FUNCTIONAL MODEL--------')
     #load functional dataset
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 

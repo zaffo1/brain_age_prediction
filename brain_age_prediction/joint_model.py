@@ -42,8 +42,8 @@ def join_models(model_f,model_s,hidden_units):
     equal to "hidden_units".
     Return the compiled joint model.
     '''
-    #create joint model
-    model_concat = concatenate([model_f.output, model_s.output], axis=-1)
+    #create joint model, removing the last layers of the single models
+    model_concat = concatenate([model_f.layers[-2].output, model_s.layers[-2].output], axis=-1)
     model_concat = Dense(hidden_units, activation='relu',kernel_regularizer=l1(0.01))(model_concat)
     model_concat = Dropout(0.2)(model_concat)
     model_concat = BatchNormalization()(model_concat)
@@ -122,6 +122,7 @@ if __name__ == "__main__":
     X_f_train, X_f_test, X_s_train, X_s_test, y_train, y_test = train_test_split(
         X_f,X_s, y, test_size=0.3, random_state=SEED)
 
+
     model_s = load_model(structural=True)
     model_f = load_model(functional=True)
 
@@ -131,6 +132,7 @@ if __name__ == "__main__":
 
     #plot the model architecture
     plot_model(model, "plots/architecture_joint_model.png", show_shapes=True)
+
 
     #train the model
     train(model,X_f_train, X_f_test, X_s_train, X_s_test, y_train, y_test)

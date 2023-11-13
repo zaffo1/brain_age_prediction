@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import os
 
+SEED = 7
 
 def age_correction(a,b,cron, pred):
     '''
@@ -60,7 +61,6 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
 
     y = np.array(df_s_td['AGE_AT_SCAN'])
 
-    SEED = 7
     X_f_train, X_f_test, X_s_train, X_s_test, y_train, y_test = train_test_split(
         X_f,X_s, y, test_size=0.3, random_state=SEED)
 
@@ -175,7 +175,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     plt.subplot(122)
     plt.title('ASD (Corrected)')
 
-    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'r={r_asd_correct:.2},\nMAE = {score_correct_asd:.3} years\nPAD = {pad_c.mean():.2} years')
+    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'r={r_asd_correct:.2}\nMAE = {score_correct_asd:.3} years\nPAD = {pad_c.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
 
     plt.xlabel('Chronological Age [years]')
@@ -187,7 +187,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     if functional:
         plt.savefig('plots/asd_functional_model.pdf')
     if joint:
-        plt.savefig('plots/asd_functional_model.pdf')
+        plt.savefig('plots/asd_joint_model.pdf')
 
     plt.show()
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 
-    if 0:
+    if 1:
         #structural model
         print('--------STRUCTURAL MODEL---------')
         model             = load_model(structural=True)
@@ -214,6 +214,5 @@ if __name__ == "__main__":
     #joint model
     print('--------JOINT MODEL---------')
     model             = load_model(joint=True)
-    from keras.utils import plot_model
-    plot_model(model, "prova.png", show_shapes=True)
+
     model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, joint=True)
