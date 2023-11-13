@@ -3,7 +3,7 @@ from tensorflow.keras.models import model_from_json
 from keras.optimizers.legacy import Adam
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, ttest_ind
 from sklearn.model_selection import train_test_split
 import numpy as np
 import os
@@ -143,10 +143,10 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     score_correct = model.evaluate(X_test, y_correct, verbose=0)
 
     #predicted age difference (corrected)
-    pad_c = y_correct - y_test
-    print(f'PAD_c for TD (test set) = {pad_c.mean()} (std {pad_c.std()})')
+    pad_c_td = y_correct - y_test
+    print(f'PAD_c for TD (test set) = {pad_c_td.mean()} (std {pad_c_td.std()})')
 
-    plt.scatter(y_test,y_correct, color='green', alpha=0.7, label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years\nPAD = {pad_c.mean():.2} years')
+    plt.scatter(y_test,y_correct, color='green', alpha=0.7, label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years\nPAD = {pad_c_td.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age (corrected) [years]')
@@ -199,8 +199,8 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     print(f'r = {r_asd_correct} (p={p_asd_correct})')
 
     score_correct_asd = model.evaluate(X_asd, y_correct_asd, verbose=0)
-    pad_c = ((y_pred_asd.ravel()-b)/a) - y_asd
-    print(f'PAD_c for ASD = {pad_c.mean()} (std = {pad_c.std()})')
+    pad_c_asd = ((y_pred_asd.ravel()-b)/a) - y_asd
+    print(f'PAD_c for ASD = {pad_c_asd.mean()} (std = {pad_c_asd.std()})')
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age [years]')
     plt.legend()
@@ -208,7 +208,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     plt.subplot(122)
     plt.title('ASD (Corrected)')
 
-    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'r={r_asd_correct:.2}\nMAE = {score_correct_asd:.3} years\nPAD = {pad_c.mean():.2} years')
+    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'r={r_asd_correct:.2}\nMAE = {score_correct_asd:.3} years\nPAD = {pad_c_asd.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
 
     plt.xlabel('Chronological Age [years]')
@@ -221,6 +221,17 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
         plt.savefig('plots/asd_functional_model.pdf')
     if joint:
         plt.savefig('plots/asd_joint_model.pdf')
+
+    plt.figure(3)
+    plt.scatter(y_asd, pad_c_asd)
+    plt.hlines(y=0, xmin=0,xmax=40)
+    plt.figure(4)
+
+    plt.hist(pad_c_td,bins=30,color='blue', alpha=0.5, density=True)
+    plt.hist(pad_c_asd,bins=30,color='red', alpha=0.5, density=True)
+
+    print(np.var(pad_c_td),np.var(pad_c_asd))
+    print(ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=False))
 
     plt.show()
 
@@ -238,14 +249,15 @@ if __name__ == "__main__":
 
         model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=True)
 
+    if 0:
         #functional model
         print('--------FUNCTIONAL MODEL---------')
         model             = load_model(functional=True)
 
         model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, functional=True)
 
-    #joint model
-    print('--------JOINT MODEL---------')
-    model             = load_model(joint=True)
+        #joint model
+        print('--------JOINT MODEL---------')
+        model             = load_model(joint=True)
 
-    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, joint=True)
+        model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, joint=True)
