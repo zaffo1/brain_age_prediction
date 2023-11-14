@@ -231,7 +231,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     plt.hist(pad_c_asd,bins=30,color='red', alpha=0.5, density=True)
 
     print(np.var(pad_c_td),np.var(pad_c_asd))
-    print(ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=False))
+    print(ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True))
 
     plt.show()
 

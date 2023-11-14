@@ -45,7 +45,11 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
                     cv=k_fold,
                     verbose=3)
 
-    grid_result = grid_search.fit(X_train, y_train, epochs = 100, verbose = 0)
+    if structural:
+        max_epochs = 100
+    if functional:
+        max_epochs = 300
+    grid_result = grid_search.fit(X_train, y_train, epochs = max_epochs, verbose = 0)
 
     #print the results of the grid search:
     print(f'Best: {grid_result.best_score_} using {grid_result.best_params_}')
@@ -104,8 +108,8 @@ if __name__ == "__main__":
                                                             random_state=SEED)
 
     #define search space
-    dropout = [0.2,0.5]
-    hidden_neurons = [100,200,500]
+    dropout = [0.1,0.2,0.5]
+    hidden_neurons = [50,100,200]
     hidden_layers = [1,2,3]
     search = [dropout,hidden_neurons,hidden_layers]
 
