@@ -122,7 +122,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     plt.plot(x,x, color = 'grey', linestyle='--')
 
     #fit
-    popt, pcov = curve_fit(line, y_test, y_pred.ravel())
+    popt = curve_fit(line, y_test, y_pred.ravel())[0]
     a, b = popt
     print(f'a = {popt[0]}, b={popt[1]}')
 
@@ -242,14 +242,14 @@ if __name__ == "__main__":
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 
-    if 1:
+    if 0:
         #structural model
         print('--------STRUCTURAL MODEL---------')
         model             = load_model(structural=True)
 
         model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=True)
 
-    if 0:
+    if 1:
         #functional model
         print('--------FUNCTIONAL MODEL---------')
         model             = load_model(functional=True)

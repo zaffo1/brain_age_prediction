@@ -122,20 +122,19 @@ if __name__ == "__main__":
     #load data
     X_s_train, X_s_test, y_s_train, y_s_test,X_f_train, X_f_test, y_f_train, y_f_test  = load_train_test(split=0.3,seed=SEED)
 
-    #structural model
-    print('--------STRUCTURAL MODEL---------')
-    retrain(X_train=X_s_train,y_train=y_s_train,X_test=X_s_test,y_test=y_s_test,structural=True)
+    if 0:
+        #structural model
+        print('--------STRUCTURAL MODEL---------')
+        retrain(X_train=X_s_train,y_train=y_s_train,X_test=X_s_test,y_test=y_s_test,structural=True)
 
-    #functional model
-    print('--------FUNCTIONAL MODEL---------')
-    retrain(X_train=X_f_train,y_train=y_f_train,X_test=X_f_test,y_test=y_f_test,functional=True)
+        #functional model
+        print('--------FUNCTIONAL MODEL---------')
+        retrain(X_train=X_f_train,y_train=y_f_train,X_test=X_f_test,y_test=y_f_test,functional=True)
 
     #joint model
     print('--------JOINT MODEL---------')
 
-    merged_train = np.concatenate([X_f_train,X_s_train], axis=-1)
-    merged_test = np.concatenate([X_f_test,X_s_test], axis=-1)
     y_test = y_f_test
     y_train = y_f_train
 
-    retrain(X_train=merged_train,y_train=y_train,X_test=merged_test,y_test=y_test,joint=True)
+    retrain(X_train=[X_f_train,X_s_train],y_train=y_train,X_test=[X_f_test,X_s_test],y_test=y_test,joint=True)

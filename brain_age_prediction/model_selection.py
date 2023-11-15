@@ -3,6 +3,7 @@ from useful_functions import load_train_test, create_functional_model, create_st
 from sklearn.model_selection import KFold
 from scikeras.wrappers import KerasRegressor
 from sklearn.model_selection import GridSearchCV
+from keras.utils import plot_model
 
 SEED = 7 #fixed for reproducibility
 
@@ -40,7 +41,8 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
     # define search space
     param_grid = {'model__dropout': search_space[0],
                     'model__hidden_neurons': search_space[1],
-                    'model__hidden_layers': search_space[2]}
+                    'model__hidden_layers': search_space[2],
+                    'model__model_selection': [True]}
 
     grid_search = GridSearchCV(
                     model,
@@ -55,6 +57,15 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
     if functional or joint:
         max_epochs = 300
     grid_result = grid_search.fit(X_train, y_train, epochs = max_epochs, verbose = 0)
+
+    if joint:
+    #Only in the case of the joint model (which has a different input layer in the case
+    # of model selection), create a plot showing the plot used for ms.
+        joint_model = create_joint_model(dropout=grid_result.best_params_['model__dropout'],
+                         hidden_neurons=grid_result.best_params_['model__hidden_neurons'],
+                         hidden_layers=grid_result.best_params_['model__hidden_layers'],
+                         model_selection=grid_result.best_params_['model__model_selection'])
+        plot_model(joint_model, "plots/architecture_joint_model_selection.png", show_shapes=True)
 
     #print the results of the grid search:
     print(f'Best: {grid_result.best_score_} using {grid_result.best_params_}')

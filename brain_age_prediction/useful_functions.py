@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split
-
+from keras.utils import plot_model
 from keras.models import Sequential, Model
 from keras.layers import Input, Dense, Dropout, BatchNormalization, concatenate, Lambda
 from keras.regularizers import l1
@@ -130,15 +130,12 @@ def create_functional_model(dropout, hidden_neurons, hidden_layers):
     model.compile(loss='mae', optimizer=optim)
     return model
 
-def create_joint_model(dropout, hidden_neurons, hidden_layers):
+def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=False):
     '''
     join functional and structural using a concatenate layer. Add another hidden layer with a number of units
     equal to "hidden_units".
     Return the compiled joint model.
     '''
-
-
-
     # Read dictionary pkl file
     with open(os.path.join('best_hyperparams','structural_model_hyperparams.pkl'), 'rb') as fp:
         s_best_hyperparams = pickle.load(fp)
@@ -154,27 +151,35 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers):
     s_hidden_neurons=s_best_hyperparams['model__hidden_neurons']
     s_hidden_layers=s_best_hyperparams['model__hidden_layers']
 
+    if model_selection:
+        combi_input = Input(shape=(5474,))
+        f_input = Lambda(lambda x: (x[:,:5253]))(combi_input) # (None, 1)
+        s_input = Lambda(lambda x: (x[:,5253:]))(combi_input)
 
-    combi_input = Input(shape=(5474,))
-    f_input = Lambda(lambda x: (x[:,:5253]))(combi_input) # (None, 1)
-    s_input = Lambda(lambda x: (x[:,5352:]))(combi_input)
-
-    model_f = (Dropout(f_dropout))(f_input)
-    model_f = (BatchNormalization())(model_f)
+        model_f = (Dropout(f_dropout))(f_input)
+        model_f = (BatchNormalization())(model_f)
+    else:
+        input_f= Input(shape=(5253,))
+        model_f = (Dropout(f_dropout))(input_f)
+        model_f = (BatchNormalization())(model_f)
 
     for i in range(f_hidden_layers):
         model_f = Dense(f_hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_f)
         model_f = (Dropout(f_dropout))(model_f)
         model_f = (BatchNormalization())(model_f)
 
-    model_s = (Dropout(s_dropout))(s_input)
-    model_s = (BatchNormalization())(model_s)
+    if model_selection:
+        model_s = (Dropout(s_dropout))(s_input)
+        model_s = (BatchNormalization())(model_s)
+    else:
+        input_s= Input(shape=(221,))
+        model_s = (Dropout(f_dropout))(input_s)
+        model_s = (BatchNormalization())(model_s)
 
     for i in range(s_hidden_layers):
         model_s = Dense(s_hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_s)
         model_s = (Dropout(s_dropout))(model_s)
         model_s = (BatchNormalization())(model_s)
-
 
 
     model_concat = concatenate([model_f, model_s], axis=-1)
@@ -188,11 +193,16 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers):
 
     model_concat = Dense(1, activation='linear',kernel_regularizer=l1(0.01))(model_concat)
 
-    model = Model(inputs=combi_input, outputs=model_concat)
+    if model_selection:
+        model = Model(inputs=combi_input, outputs=model_concat)
+    else:
+        model = Model(inputs=[input_f,input_s], outputs=model_concat)
+
 
     #compile the model
     optim = Adam(learning_rate=0.01)
     model.compile(loss='mae', optimizer=optim)
+
 
     return model
 
