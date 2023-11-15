@@ -1,5 +1,5 @@
 import pickle
-from useful_functions import load_dataset, preprocessing, create_functional_model, create_structural_model, create_joint_model
+from useful_functions import load_train_test, create_functional_model, create_structural_model, create_joint_model
 from sklearn.model_selection import KFold
 from scikeras.wrappers import KerasRegressor
 from sklearn.model_selection import GridSearchCV
@@ -76,29 +76,10 @@ if __name__ == "__main__":
 
     import numpy as np
     import os
-    from sklearn.model_selection import train_test_split
 
     #load data
+    X_s_train, X_s_test, y_s_train, y_s_test,X_f_train, X_f_test, y_f_train, y_f_test  = load_train_test(split=0.3,seed=SEED)
 
-    #load structutal dataset
-    df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
-    #preprocess input features
-    X = preprocessing(df_s_td)
-    #load targets
-    y = np.array(df_s_td['AGE_AT_SCAN'])
-    # shuffle and split training and test sets
-    X_s_train, X_s_test, y_s_train, y_s_test = train_test_split(X, y, test_size=0.3,
-                                                            random_state=SEED)
-
-    #load functional dataset
-    df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
-
-    X = preprocessing(df_f_td)
-    y = np.array(df_f_td['AGE_AT_SCAN'])
-
-    # shuffle and split training and test sets
-    X_f_train, X_f_test, y_f_train, y_f_test = train_test_split(X, y, test_size=0.3,
-                                                            random_state=SEED)
 
     if 0:
         #structural model grid search

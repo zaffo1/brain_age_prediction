@@ -3,6 +3,7 @@ import pickle
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import RobustScaler
+from sklearn.model_selection import train_test_split
 
 from keras.models import Sequential, Model
 from keras.layers import Input, Dense, Dropout, BatchNormalization, concatenate, Lambda
@@ -41,6 +42,38 @@ def preprocessing(df):
     features = transformer.transform(features)
 
     return features
+
+
+def load_train_test(split=0.3, seed=7):
+    '''
+    Load both the structural and functional datasets.
+    Apply preprocessing to input features.
+    Split the data in train and test, according to the "split" variable
+    '''
+
+    df_s_td = load_dataset(dataset_name='Harmonized_structural_features.csv')[0]
+    #load functional dataset
+    df_f_td = load_dataset(dataset_name='Harmonized_functional_features.csv')[0]
+
+    #preprocess input features
+    x_s = preprocessing(df_s_td)
+    x_f = preprocessing(df_f_td)
+
+    #load targets
+    #check if targets are equal (UNIT TEST)
+    y_s = df_s_td['AGE_AT_SCAN']
+    y_f = df_f_td['AGE_AT_SCAN']
+    print(y_s.equals(y_f))
+    y = np.array(y_s)
+
+    # shuffle and split training and test sets
+    x_s_tr, x_s_te, y_s_tr, y_s_te = train_test_split(x_s, y, test_size=split,
+                                                            random_state=seed)
+    x_f_tr, x_f_te, y_f_tr, y_f_te = train_test_split(x_f, y, test_size=split,
+                                                            random_state=seed)
+
+    return x_s_tr, x_s_te, y_s_tr, y_s_te, x_f_tr, x_f_te, y_f_tr, y_f_te
+
 
 def create_structural_model(dropout, hidden_neurons, hidden_layers):
     '''
