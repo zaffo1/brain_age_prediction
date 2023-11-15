@@ -1,5 +1,5 @@
 import pickle
-from useful_functions import load_dataset, preprocessing, create_functional_model, create_structural_model
+from useful_functions import load_dataset, preprocessing, create_functional_model, create_structural_model, create_joint_model
 from sklearn.model_selection import KFold
 from scikeras.wrappers import KerasRegressor
 from sklearn.model_selection import GridSearchCV
@@ -7,7 +7,7 @@ from sklearn.model_selection import GridSearchCV
 SEED = 7 #fixed for reproducibility
 
 
-def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,structural=False):
+def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,structural=False, joint=False):
     '''
     function that performs k-fold cross validation in order to do model selection using grid search,
     in particular, the parameters are:
@@ -32,6 +32,11 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
         model = KerasRegressor(model=create_functional_model, verbose=0)
         filename = 'functional_model_hyperparams.pkl'
 
+    if joint:
+        model = KerasRegressor(model=create_joint_model, verbose=0)
+        filename = 'joint_model_hyperparams.pkl'
+
+
     # define search space
     param_grid = {'model__dropout': search_space[0],
                     'model__hidden_neurons': search_space[1],
@@ -47,7 +52,7 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
 
     if structural:
         max_epochs = 100
-    if functional:
+    if functional or joint:
         max_epochs = 300
     grid_result = grid_search.fit(X_train, y_train, epochs = max_epochs, verbose = 0)
 
@@ -73,30 +78,18 @@ if __name__ == "__main__":
     import os
     from sklearn.model_selection import train_test_split
 
-    #structural model
-    print('--------STRUCTURAL MODEL--------')
+    #load data
+
     #load structutal dataset
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
-
     #preprocess input features
     X = preprocessing(df_s_td)
     #load targets
     y = np.array(df_s_td['AGE_AT_SCAN'])
-
     # shuffle and split training and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
+    X_s_train, X_s_test, y_s_train, y_s_test = train_test_split(X, y, test_size=0.3,
                                                             random_state=SEED)
-    #define search space
-    dropout = [0.2,0.5]
-    hidden_neurons = [10,20,30,50]
-    hidden_layers = [1,2,3,4,5]
-    search = [dropout,hidden_neurons,hidden_layers]
 
-    model_selection(structural=True, search_space=search,X_train=X_train,y_train=y_train)
-
-
-    #functional model
-    print('--------FUNCTIONAL MODEL--------')
     #load functional dataset
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 
@@ -104,13 +97,45 @@ if __name__ == "__main__":
     y = np.array(df_f_td['AGE_AT_SCAN'])
 
     # shuffle and split training and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
+    X_f_train, X_f_test, y_f_train, y_f_test = train_test_split(X, y, test_size=0.3,
                                                             random_state=SEED)
 
-    #define search space
-    dropout = [0.1,0.2,0.5]
-    hidden_neurons = [50,100,200]
-    hidden_layers = [1,2,3]
-    search = [dropout,hidden_neurons,hidden_layers]
+    if 0:
+        #structural model grid search
+        print('--------STRUCTURAL MODEL--------')
 
-    model_selection(functional=True, search_space=search,X_train=X_train,y_train=y_train)
+        #define search space
+        dropout = [0.2,0.5]
+        hidden_neurons = [10,20,30,50]
+        hidden_layers = [1,2,3,4,5]
+        search = [dropout,hidden_neurons,hidden_layers]
+
+        model_selection(structural=True, search_space=search,X_train=X_s_train,y_train=y_s_train)
+
+    if 0:
+        #functional model grid search
+        print('--------FUNCTIONAL MODEL--------')
+
+        #define search space
+        dropout = [0.1,0.2,0.5]
+        hidden_neurons = [50,100,200]
+        hidden_layers = [1,2,3]
+        search = [dropout,hidden_neurons,hidden_layers]
+
+        model_selection(functional=True, search_space=search,X_train=X_f_train,y_train=y_f_train)
+
+    if 1:
+        #joint model grid search
+        print('--------JOINT MODEL--------')
+
+        ### check if targets are equal!!
+        y_train = y_f_train
+        merged_inputs = np.concatenate([X_f_train,X_s_train], axis=-1)
+
+
+        dropout = [0.2,0.5]
+        hidden_neurons = [10,20,30,50]
+        hidden_layers = [1,2,3]
+        search = [dropout, hidden_neurons, hidden_layers]
+
+        model_selection(joint=True, search_space=search, X_train=merged_inputs, y_train=y_train)
