@@ -1,3 +1,7 @@
+'''
+Module containing useful function to perform the analysis
+'''
+
 import os
 import sys
 import pickle
@@ -94,7 +98,7 @@ def create_structural_model(dropout, hidden_neurons, hidden_layers):
     model.add(Dropout(dropout))
     model.add(BatchNormalization())
 
-    for i in range(hidden_layers):
+    for _ in range(hidden_layers):
         model.add(Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01)))
         model.add(Dropout(dropout))
         model.add(BatchNormalization())
@@ -192,7 +196,8 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
 
     #model_concat = concatenate([model_f.layers[-2].output, model_s.layers[-2].output], axis=-1)
     for _ in range(hidden_layers):
-        model_concat = Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_concat)
+        model_concat = Dense(hidden_neurons, activation='relu',
+                             kernel_regularizer=l1(0.01))(model_concat)
         model_concat = Dropout(dropout)(model_concat)
         model_concat = BatchNormalization()(model_concat)
 

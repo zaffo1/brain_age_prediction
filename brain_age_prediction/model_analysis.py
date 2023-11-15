@@ -1,13 +1,18 @@
-from useful_functions import load_dataset, preprocessing, line
-from tensorflow.keras.models import model_from_json
-from keras.optimizers.legacy import Adam
+'''
+Given the ML models already trained,
+Apply them to our analysis
+'''
+import os
+import sys
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr, ttest_ind
+from keras.models import model_from_json
+from keras.optimizers.legacy import Adam
 from sklearn.model_selection import train_test_split
-import numpy as np
-import os
-import sys
+from useful_functions import load_dataset, preprocessing, line
+
 
 SEED = 7
 
@@ -24,7 +29,7 @@ def permutation_test(x,y,permutation_number=1000):
     #Number of permutations:
     p=permutation_number
     #Initialize permutation loop:
-    for i in range(0,p):
+    for _ in range(0,p):
     #Shuffle one of the features:
         np.random.shuffle(x_s)
         #Computed permuted correlations and store them in pR:
@@ -86,35 +91,36 @@ def load_model(structural=False,functional=False, joint=False):
     return model
 
 
-def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,functional=False,joint=False):
+def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
+                   structural=False,functional=False,joint=False):
     '''
     function that performs an analysis of the results obtained using the
     regression models obtained.
     In particular: ..........
     '''
 
-    X_s = preprocessing(df_s_td)
-    X_f = preprocessing(df_f_td)
+    x_s = preprocessing(df_s_td)
+    x_f = preprocessing(df_f_td)
 
     y = np.array(df_s_td['AGE_AT_SCAN'])
 
-    X_f_train, X_f_test, X_s_train, X_s_test, y_train, y_test = train_test_split(
-        X_f,X_s, y, test_size=0.3, random_state=SEED)
+    _, x_f_test, _, x_s_test, _, y_test = train_test_split(
+        x_f,x_s, y, test_size=0.3, random_state=SEED)
 
     if structural:
-        X_test = X_s_test
+        x_test = x_s_test
 
     if functional:
-        X_test = X_f_test
+        x_test = x_f_test
 
     if joint:
-        X_test = [X_f_test,X_s_test]
+        x_test = [x_f_test,x_s_test]
 
 
     #evalueate model
-    score = model.evaluate(X_test, y_test, verbose=0)
+    score = model.evaluate(x_test, y_test, verbose=0)
     print(f'TD TEST MAE = {score}')
-    y_pred = model.predict(X_test)
+    y_pred = model.predict(x_test)
 
     r_td, p_td = permutation_test(y_test,y_pred.ravel())
     print(f'r = {r_td} (p={p_td})')
@@ -130,7 +136,8 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     plt.subplot(121)
     plt.title('TD')
 
-    plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'r={r_td:.2}\nMAE = {score:.3} years')
+    plt.scatter(y_test,y_pred, color='blue', alpha=0.7,
+                 label=f'r={r_td:.2}\nMAE = {score:.3} years')
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
 
@@ -140,7 +147,8 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     print(f'a = {popt[0]}, b={popt[1]}')
 
     plt.plot(x,x, color = 'grey', linestyle='--')
-    plt.plot(x,line(x,a,b), color = 'red', linestyle='-', label=f'fit ($\\alpha$ = {a:.2}, $\\beta$ = {b:.2})')
+    plt.plot(x,line(x,a,b), color = 'red', linestyle='-',
+              label=f'fit ($\\alpha$ = {a:.2}, $\\beta$ = {b:.2})')
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age [years]')
     plt.legend()
@@ -153,13 +161,14 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     print(f'r = {r_td_correct} (p={p_td_correct})')
 
 
-    score_correct = model.evaluate(X_test, y_correct, verbose=0)
+    score_correct = model.evaluate(x_test, y_correct, verbose=0)
 
     #predicted age difference (corrected)
     pad_c_td = y_correct - y_test
     print(f'PAD_c for TD (test set) = {pad_c_td.mean()} (std {pad_c_td.std()})')
 
-    plt.scatter(y_test,y_correct, color='green', alpha=0.7, label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years\nPAD = {pad_c_td.mean():.2} years')
+    plt.scatter(y_test,y_correct, color='green', alpha=0.7,
+                 label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years\nPAD = {pad_c_td.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age (corrected) [years]')
@@ -176,17 +185,17 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     #ASD
 
     if structural:
-        X_asd = preprocessing(df_s_asd)
+        x_asd = preprocessing(df_s_asd)
     if functional:
-        X_asd = preprocessing(df_f_asd)
+        x_asd = preprocessing(df_f_asd)
     if joint:
-        X_asd = [preprocessing(df_f_asd),preprocessing(df_s_asd)]
+        x_asd = [preprocessing(df_f_asd),preprocessing(df_s_asd)]
 
 
     y_asd = np.array(df_s_asd['AGE_AT_SCAN'])
-    y_pred_asd = model.predict(X_asd)
+    y_pred_asd = model.predict(x_asd)
 
-    score_asd = model.evaluate(X_asd, y_asd, verbose=0)
+    score_asd = model.evaluate(x_asd, y_asd, verbose=0)
     print(f'ASD MAE = {score_asd}')
 
     r_asd, p_asd =permutation_test(y_asd,y_pred_asd.ravel())
@@ -211,7 +220,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     r_asd_correct, p_asd_correct =permutation_test(y_asd,y_correct_asd.ravel())
     print(f'r = {r_asd_correct} (p={p_asd_correct})')
 
-    score_correct_asd = model.evaluate(X_asd, y_correct_asd, verbose=0)
+    score_correct_asd = model.evaluate(x_asd, y_correct_asd, verbose=0)
     pad_c_asd = ((y_pred_asd.ravel()-b)/a) - y_asd
     print(f'PAD_c for ASD = {pad_c_asd.mean()} (std = {pad_c_asd.std()})')
     plt.xlabel('Chronological Age [years]')
