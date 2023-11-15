@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 import pandas as pd
 import numpy as np
@@ -18,10 +19,14 @@ def load_dataset(dataset_name):
     '''
 
     #import dataset
-    file_path_structural = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), '..', 'dataset-ABIDE-I-II',dataset_name))
+    try:
+        file_path_structural = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', 'dataset-ABIDE-I-II',dataset_name))
+        df = pd.read_csv(file_path_structural)
+    except OSError as e:
+        print(f'Cannot load the dataset! \n{e}')
+        sys.exit(1)
 
-    df = pd.read_csv(file_path_structural)
     df_td = df[(df["DX_GROUP"] == -1)]
     df_asd = df[(df["DX_GROUP"] == 1)]
 
@@ -117,7 +122,7 @@ def create_functional_model(dropout, hidden_neurons, hidden_layers):
     model.add(Dropout(dropout))
     model.add(BatchNormalization())
 
-    for i in range(hidden_layers):
+    for _ in range(hidden_layers):
         model.add(Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01)))
         model.add(Dropout(dropout))
         model.add(BatchNormalization())
@@ -163,7 +168,7 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
         model_f = (Dropout(f_dropout))(input_f)
         model_f = (BatchNormalization())(model_f)
 
-    for i in range(f_hidden_layers):
+    for _ in range(f_hidden_layers):
         model_f = Dense(f_hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_f)
         model_f = (Dropout(f_dropout))(model_f)
         model_f = (BatchNormalization())(model_f)
@@ -176,7 +181,7 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
         model_s = (Dropout(f_dropout))(input_s)
         model_s = (BatchNormalization())(model_s)
 
-    for i in range(s_hidden_layers):
+    for _ in range(s_hidden_layers):
         model_s = Dense(s_hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_s)
         model_s = (Dropout(s_dropout))(model_s)
         model_s = (BatchNormalization())(model_s)
@@ -186,7 +191,7 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
     #create joint model, removing the last layers of the single models
 
     #model_concat = concatenate([model_f.layers[-2].output, model_s.layers[-2].output], axis=-1)
-    for i in range(hidden_layers):
+    for _ in range(hidden_layers):
         model_concat = Dense(hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_concat)
         model_concat = Dropout(dropout)(model_concat)
         model_concat = BatchNormalization()(model_concat)

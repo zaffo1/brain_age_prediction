@@ -67,8 +67,8 @@ def load_model(structural=False,functional=False, joint=False):
         json_file.close()
         model = model_from_json(loaded_model_json)
     except OSError as e:
-        print(f'Cannot load the model:
-               cannot read the file in which the model should be saved! \n{e}')
+        print('Cannot load the model:'
+              f'cannot read the file in which the model should be saved! \n{e}')
         sys.exit(1)
 
 
@@ -76,8 +76,8 @@ def load_model(structural=False,functional=False, joint=False):
     try:
         model.load_weights(os.path.join('saved_models',h5_name))
     except OSError as e:
-        print(f'Cannot load weights into the model:
-               cannot read the file in which the weights should be saved! \n{e}')
+        print('Cannot load weights into the model:'
+              f'cannot read the file in which the weights should be saved! \n{e}')
         sys.exit(1)
 
     optim = Adam(learning_rate = 0.001)
