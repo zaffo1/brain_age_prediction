@@ -1,3 +1,5 @@
+import os
+import sys
 import pickle
 from useful_functions import load_train_test, create_functional_model, create_structural_model, create_joint_model
 from sklearn.model_selection import KFold
@@ -40,7 +42,12 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
 
 
     # define search space
-    param_grid = {'model__dropout': search_space[0],
+    if structural or functional:
+        param_grid = {'model__dropout': search_space[0],
+                        'model__hidden_neurons': search_space[1],
+                        'model__hidden_layers': search_space[2],}
+    elif joint:
+        param_grid = {'model__dropout': search_space[0],
                     'model__hidden_neurons': search_space[1],
                     'model__hidden_layers': search_space[2],
                     'model__model_selection': [True]}
@@ -81,10 +88,13 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
         print(f'{mean} ({stdev}) with: {param}')
 
     #save best hyperparams found
-    with open(os.path.join('best_hyperparams',filename), 'wb') as fp:
-        pickle.dump(grid_result.best_params_, fp)
-        print('optimal hyperparameters saved successfully to file')
-
+    try:
+        with open(os.path.join('best_hyperparams',filename), 'wb') as fp:
+            pickle.dump(grid_result.best_params_, fp)
+            print('optimal hyperparameters saved successfully to file')
+    except OSError as e:
+        print(f'Cannot save best hyperparameters! \n{e}')
+        sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -96,7 +106,7 @@ if __name__ == "__main__":
     X_s_train, X_s_test, y_s_train, y_s_test,X_f_train, X_f_test, y_f_train, y_f_test  = load_train_test(split=0.3,seed=SEED)
 
 
-    if 0:
+    if 1:
         #structural model grid search
         print('--------STRUCTURAL MODEL--------')
 

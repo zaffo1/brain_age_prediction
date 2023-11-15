@@ -7,6 +7,7 @@ from scipy.stats import pearsonr, ttest_ind
 from sklearn.model_selection import train_test_split
 import numpy as np
 import os
+import sys
 
 SEED = 7
 
@@ -60,12 +61,24 @@ def load_model(structural=False,functional=False, joint=False):
 
 
     # load json and create model
-    json_file         = open(os.path.join('saved_models',json_name), 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
+    try:
+        json_file         = open(os.path.join('saved_models',json_name), 'r', encoding='utf-8')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)
+    except OSError as e:
+        print(f'Cannot load the model:
+               cannot read the file in which the model should be saved! \n{e}')
+        sys.exit(1)
+
+
     # load weights into new model
-    model.load_weights(os.path.join('saved_models',h5_name))
+    try:
+        model.load_weights(os.path.join('saved_models',h5_name))
+    except OSError as e:
+        print(f'Cannot load weights into the model:
+               cannot read the file in which the weights should be saved! \n{e}')
+        sys.exit(1)
 
     optim = Adam(learning_rate = 0.001)
     model.compile(loss='mae', optimizer=optim)
@@ -103,7 +116,7 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     print(f'TD TEST MAE = {score}')
     y_pred = model.predict(X_test)
 
-    r_td, p_td =permutation_test(y_test,y_pred.ravel())
+    r_td, p_td = permutation_test(y_test,y_pred.ravel())
     print(f'r = {r_td} (p={p_td})')
 
     plt.figure(1, figsize=[12,5])

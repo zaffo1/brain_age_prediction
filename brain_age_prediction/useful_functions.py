@@ -131,7 +131,8 @@ def create_functional_model(dropout, hidden_neurons, hidden_layers):
 
 def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=False):
     '''
-    join functional and structural using a concatenate layer. Add another hidden layer with a number of units
+    join functional and structural using a concatenate layer.
+    Add another hidden layer with a number of units
     equal to "hidden_units".
     Return the compiled joint model.
     '''

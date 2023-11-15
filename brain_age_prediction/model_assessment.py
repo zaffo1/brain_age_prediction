@@ -1,3 +1,4 @@
+import sys
 import os
 import pickle
 import matplotlib.pyplot as plt
@@ -56,8 +57,12 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False,join
         create_model = create_joint_model
 
     # Read dictionary pkl file
-    with open(os.path.join('best_hyperparams',filename), 'rb') as fp:
-        best_hyperparams = pickle.load(fp)
+    try:
+        with open(os.path.join('best_hyperparams',filename), 'rb') as fp:
+            best_hyperparams = pickle.load(fp)
+    except OSError as e:
+        print(f'Cannot load best hyperparameters: cannot read the file in which they should be saved! \n{e}')
+        sys.exit(1)
 
 
     model = create_model(dropout=best_hyperparams['model__dropout'],
@@ -107,11 +112,16 @@ def retrain(X_train,y_train,X_test,y_test,functional=False,structural=False,join
 
     # serialize model to JSON
     model_json = model.to_json()
-    with open(os.path.join('saved_models',json_name), 'w') as json_file:
-        json_file.write(model_json)
-    # serialize weights to HDF5
-    model.save_weights(os.path.join('saved_models',h5_name))
-    print("Saved model to disk")
+
+    try:
+        with open(os.path.join('saved_models',json_name), 'w', encoding='utf-8') as json_file:
+            json_file.write(model_json)
+        # serialize weights to HDF5
+        model.save_weights(os.path.join('saved_models',h5_name))
+        print("Saved model to disk")
+    except OSError as e:
+        print(f'Cannot save the model! \n{e}')
+        sys.exit(1)
 
     plot_loss(history=train.history, loss=score,structural=structural,functional=functional,joint=joint)
 
@@ -122,7 +132,7 @@ if __name__ == "__main__":
     #load data
     X_s_train, X_s_test, y_s_train, y_s_test,X_f_train, X_f_test, y_f_train, y_f_test  = load_train_test(split=0.3,seed=SEED)
 
-    if 0:
+    if 1:
         #structural model
         print('--------STRUCTURAL MODEL---------')
         retrain(X_train=X_s_train,y_train=y_s_train,X_test=X_s_test,y_test=y_s_test,structural=True)
