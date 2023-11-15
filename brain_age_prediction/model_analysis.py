@@ -225,13 +225,30 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=False,func
     plt.figure(3)
     plt.scatter(y_asd, pad_c_asd)
     plt.hlines(y=0, xmin=0,xmax=40)
+
+    t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)
+
     plt.figure(4)
 
-    plt.hist(pad_c_td,bins=30,color='blue', alpha=0.5, density=True)
-    plt.hist(pad_c_asd,bins=30,color='red', alpha=0.5, density=True)
-
+    bins = plt.hist(pad_c_td,bins=30,color='blue', alpha=0.5, density=True, label='TD')[1]
+    plt.hist(pad_c_asd,bins=bins,color='red', alpha=0.5, density=True, label='ASD')
+    plt.xlabel('PAD [years]')
+    plt.ylabel('Relative Frequency')
+    plt.legend()
     print(np.var(pad_c_td),np.var(pad_c_asd))
-    print(ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True))
+    print(t, p)
+
+    if structural:
+        plt.title(f'Structural Model\nPAD distribution (t={t:.3}, p={p:.3})')
+        plt.savefig('plots/PAD_distribution_structural_model.pdf')
+
+    if functional:
+        plt.title(f'Functional Model\nPAD distribution (t={t:.3}, p={p:.3})')
+        plt.savefig('plots/PAD_distribution_functional_model.pdf')
+
+    if joint:
+        plt.title(f'Joint Model\nPAD distribution (t={t:.3}, p={p:.3})')
+        plt.savefig('plots/PAD_distribution_joint_model.pdf')
 
     plt.show()
 
@@ -242,22 +259,22 @@ if __name__ == "__main__":
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 
-    if 0:
-        #structural model
-        print('--------STRUCTURAL MODEL---------')
-        model             = load_model(structural=True)
 
-        model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=True)
+    #structural model
+    print('--------STRUCTURAL MODEL---------')
+    model             = load_model(structural=True)
 
-    if 1:
-        #functional model
-        print('--------FUNCTIONAL MODEL---------')
-        model             = load_model(functional=True)
+    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=True)
 
-        model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, functional=True)
 
-        #joint model
-        print('--------JOINT MODEL---------')
-        model             = load_model(joint=True)
+    #functional model
+    print('--------FUNCTIONAL MODEL---------')
+    model             = load_model(functional=True)
 
-        model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, joint=True)
+    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, functional=True)
+
+    #joint model
+    print('--------JOINT MODEL---------')
+    model             = load_model(joint=True)
+
+    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, joint=True)

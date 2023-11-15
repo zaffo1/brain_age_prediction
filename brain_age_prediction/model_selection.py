@@ -4,6 +4,7 @@ from sklearn.model_selection import KFold
 from scikeras.wrappers import KerasRegressor
 from sklearn.model_selection import GridSearchCV
 from keras.utils import plot_model
+from keras.callbacks import ReduceLROnPlateau
 
 SEED = 7 #fixed for reproducibility
 
@@ -56,7 +57,10 @@ def model_selection(search_space, X_train,y_train,n_folds=5,functional=False,str
         max_epochs = 100
     if functional or joint:
         max_epochs = 300
-    grid_result = grid_search.fit(X_train, y_train, epochs = max_epochs, verbose = 0)
+
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,patience=10, min_lr=0.00001)
+
+    grid_result = grid_search.fit(X_train, y_train, epochs = max_epochs, verbose = 0, callbacks=[reduce_lr])
 
     if joint:
     #Only in the case of the joint model (which has a different input layer in the case
@@ -126,7 +130,7 @@ if __name__ == "__main__":
 
 
         dropout = [0.2,0.5]
-        hidden_neurons = [10,20,30,50]
+        hidden_neurons = [10,30,50,100]
         hidden_layers = [1,2,3]
         search = [dropout, hidden_neurons, hidden_layers]
 

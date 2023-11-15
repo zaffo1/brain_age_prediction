@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split
-from keras.utils import plot_model
 from keras.models import Sequential, Model
 from keras.layers import Input, Dense, Dropout, BatchNormalization, concatenate, Lambda
 from keras.regularizers import l1
