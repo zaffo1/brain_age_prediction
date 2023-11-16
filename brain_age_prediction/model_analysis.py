@@ -278,6 +278,12 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
 
 
 if __name__ == "__main__":
+    import tensorflow as tf
+
+    #check if GPU is available
+    print("\nNum GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
+
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 

@@ -149,6 +149,10 @@ def retrain(x_train,y_train,x_test,y_test,functional=False,structural=False,join
 
 
 if __name__ == "__main__":
+    import tensorflow as tf
+
+    #check if GPU is available
+    print("\nNum GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
     #load data
     x_s_train, x_s_test, y_s_train, y_s_test,x_f_train, x_f_test, y_f_train, y_f_test  = (
