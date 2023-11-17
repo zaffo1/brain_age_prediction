@@ -87,7 +87,7 @@ def model_selection(search_space, x_train,y_train,
                     verbose=3)
 
     if structural:
-        max_epochs = 100
+        max_epochs = 200
     if functional or joint:
         max_epochs = 300
 
@@ -96,6 +96,7 @@ def model_selection(search_space, x_train,y_train,
     grid_result = grid_search.fit(x_train,
                                 y_train,
                                 epochs = max_epochs,
+                                batch_size=64,
                                 verbose = 0,
                                 callbacks=[reduce_lr])
 
@@ -155,7 +156,7 @@ if __name__ == "__main__":
 
 
     dropout = [0.1,0.2,0.5]
-    hidden_neurons = [10,30,50,100,150]
+    hidden_neurons = [50,100,150,200]
     hidden_layers = [1,2,3]
     search = [dropout, hidden_neurons, hidden_layers]
 

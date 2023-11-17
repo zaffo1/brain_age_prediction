@@ -126,14 +126,14 @@ def retrain(x_train,y_train,x_test,y_test,functional=False,structural=False,join
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,patience=10, min_lr=0.00001)
 
     if structural:
-        max_epochs = 100
+        max_epochs = 200
     if functional or joint:
         max_epochs = 300
 
     train = model.fit(x_train,
                     y_train,
                     epochs=max_epochs,
-                    batch_size=32,
+                    batch_size=64,
                     verbose=1,
                     validation_data=(x_test,y_test),
                     callbacks=[reduce_lr])
