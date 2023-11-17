@@ -4,3 +4,4 @@ pandas
 tensorflow
 scikeras
 sklearn
+sphinx==7.2.6
