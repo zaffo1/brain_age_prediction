@@ -9,9 +9,10 @@ from sklearn.model_selection import GridSearchCV
 from keras.utils import plot_model
 from keras.callbacks import ReduceLROnPlateau
 from scikeras.wrappers import KerasRegressor
-from useful_functions import (load_train_test, create_functional_model,
-    create_structural_model, create_joint_model)
-
+from brain_age_prediction.utils.loading_data import load_train_test
+from brain_age_prediction.utils.custom_models import (create_functional_model,
+                                                      create_structural_model,
+                                                      create_joint_model)
 SEED = 7 #fixed for reproducibility
 
 def print_grid_search_results(grid_result,filename):
@@ -29,7 +30,7 @@ def print_grid_search_results(grid_result,filename):
 
     #save best hyperparams found
     try:
-        with open(os.path.join('best_hyperparams',filename), 'wb') as fp:
+        with open(os.path.join('brain_age_prediction','best_hyperparams',filename), 'wb') as fp:
             pickle.dump(grid_result.best_params_, fp)
             print('optimal hyperparameters saved successfully to file')
     except OSError as e:
@@ -107,7 +108,9 @@ def model_selection(search_space, x_train,y_train,
                          hidden_neurons=grid_result.best_params_['model__hidden_neurons'],
                          hidden_layers=grid_result.best_params_['model__hidden_layers'],
                          model_selection=grid_result.best_params_['model__model_selection'])
-        plot_model(joint_model, "plots/architecture_joint_model_selection.png", show_shapes=True)
+
+    plot_model(joint_model, os.path.join(
+        'brain_age_prediction','plots','architecture_joint_model_selection.png'), show_shapes=True)
 
     print_grid_search_results(grid_result,filename)
 

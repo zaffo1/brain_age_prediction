@@ -1,6 +1,0 @@
-numpy==1.26.2
-matplotlib
-pandas
-tensorflow
-scikeras
-sklearn

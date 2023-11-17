@@ -2,7 +2,7 @@
 '''
 import unittest
 import numpy as np
-from useful_functions import load_dataset
+from brain_age_prediction.useful_functions import load_dataset
 
 
 class Tests(unittest.TestCase):
