@@ -13,7 +13,7 @@
 import os
 import sys
 package_name = 'brain_age_prediction'
-package_root = os.path.abspath(os.path.join('..','..','..'))
+package_root = os.path.abspath(os.path.join('..','..'))
 print(package_root)
 sys.path.insert(0, package_root)
 sys.path.insert(0, os.path.join(package_root, package_name))
