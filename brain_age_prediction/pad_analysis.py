@@ -4,6 +4,7 @@ Apply them to our analysis
 '''
 import os
 import sys
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -14,6 +15,7 @@ from sklearn.model_selection import train_test_split
 from brain_age_prediction.utils.loading_data import load_dataset, preprocessing
 from brain_age_prediction.utils.line import line
 
+ROOT_PATH = Path(__file__).parent.parent
 SEED = 7
 
 
@@ -67,7 +69,7 @@ def load_model(structural=False,functional=False, joint=False):
 
     # load json and create model
     try:
-        json_file         = open(os.path.join('brain_age_prediction','saved_models',json_name), 'r', encoding='utf-8')
+        json_file         = open(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',json_name), 'r', encoding='utf-8')
         loaded_model_json = json_file.read()
         json_file.close()
         model = model_from_json(loaded_model_json)
@@ -79,7 +81,7 @@ def load_model(structural=False,functional=False, joint=False):
 
     # load weights into new model
     try:
-        model.load_weights(os.path.join('brain_age_prediction','saved_models',h5_name))
+        model.load_weights(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',h5_name))
     except OSError as e:
         print('Cannot load weights into the model:'
               f'cannot read the file in which the weights should be saved! \n{e}')
@@ -175,11 +177,11 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
 
     plt.legend()
     if structural:
-        plt.savefig(os.path.join('brain_age_prediction','plots','td_structural_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','td_structural_model.pdf'))
     if functional:
-        plt.savefig(os.path.join('brain_age_prediction','plots','td_functional_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','td_functional_model.pdf'))
     if joint:
-        plt.savefig(os.path.join('brain_age_prediction','plots','td_joint_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','td_joint_model.pdf'))
 
 
     #ASD
@@ -238,11 +240,11 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
 
     plt.legend()
     if structural:
-        plt.savefig(os.path.join('brain_age_prediction','plots','asd_structural_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','asd_structural_model.pdf'))
     if functional:
-        plt.savefig(os.path.join('brain_age_prediction','plots','asd_functional_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','asd_functional_model.pdf'))
     if joint:
-        plt.savefig(os.path.join('brain_age_prediction','plots','asd_joint_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','asd_joint_model.pdf'))
 
     plt.figure(3)
     plt.scatter(y_asd, pad_c_asd)
@@ -262,15 +264,15 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
 
     if structural:
         plt.title(f'Structural Model\nPAD distribution (t={t:.3}, p={p:.3})')
-        plt.savefig(os.path.join('brain_age_prediction','plots','PAD_distribution_structural_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','PAD_distribution_structural_model.pdf'))
 
     if functional:
         plt.title(f'Functional Model\nPAD distribution (t={t:.3}, p={p:.3})')
-        plt.savefig(os.path.join('brain_age_prediction','plots','PAD_distribution_functional_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','PAD_distribution_functional_model.pdf'))
 
     if joint:
         plt.title(f'Joint Model\nPAD distribution (t={t:.3}, p={p:.3})')
-        plt.savefig(os.path.join('brain_age_prediction','plots','PAD_distribution_joint_model.pdf'))
+        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','PAD_distribution_joint_model.pdf'))
 
     plt.show()
 

@@ -37,7 +37,8 @@ def load_model_architecture(structural=False,functional=False,joint=False):
 
     # Read dictionary pkl file
     try:
-        with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams',filename), 'rb') as fp:
+        with open(os.path.join(
+            ROOT_PATH,'brain_age_prediction','best_hyperparams',filename), 'rb') as fp:
             best_hyperparams = pickle.load(fp)
     except OSError as e:
         print('Cannot load best hyperparameters:'

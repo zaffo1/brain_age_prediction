@@ -32,7 +32,8 @@ def print_grid_search_results(grid_result,filename):
 
     #save best hyperparams found
     try:
-        with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams',filename), 'wb') as fp:
+        with open(os.path.join(
+            ROOT_PATH,'brain_age_prediction','best_hyperparams',filename), 'wb') as fp:
             pickle.dump(grid_result.best_params_, fp)
             print('optimal hyperparameters saved successfully to file')
     except OSError as e:
@@ -125,29 +126,29 @@ if __name__ == "__main__":
     X_s_train, X_s_test, y_s_train, y_s_test, X_f_train, X_f_test, y_f_train, y_f_test  =(
         load_train_test(split=0.3,seed=SEED))
 
-    if 0:
-        #structural model grid search
-        print('--------STRUCTURAL MODEL--------')
 
-        #define search space
-        dropout = [0.2,0.5]
-        hidden_neurons = [10,20,30,50]
-        hidden_layers = [1,2,3,4,5]
-        search = [dropout,hidden_neurons,hidden_layers]
+    #structural model grid search
+    print('--------STRUCTURAL MODEL--------')
 
-        model_selection(structural=True,
-                            search_space=search,x_train=X_s_train,y_train=y_s_train)
+    #define search space
+    dropout = [0.2,0.5]
+    hidden_neurons = [10,20,30,50]
+    hidden_layers = [1,2,3,4,5]
+    search = [dropout,hidden_neurons,hidden_layers]
 
-        #functional model grid search
-        print('--------FUNCTIONAL MODEL--------')
+    model_selection(structural=True,
+                        search_space=search,x_train=X_s_train,y_train=y_s_train)
 
-        #define search space
-        dropout = [0.1,0.2,0.5]
-        hidden_neurons = [50,100,200]
-        hidden_layers = [1,2,3]
-        search = [dropout,hidden_neurons,hidden_layers]
+    #functional model grid search
+    print('--------FUNCTIONAL MODEL--------')
 
-        model_selection(functional=True, search_space=search,x_train=X_f_train,y_train=y_f_train)
+    #define search space
+    dropout = [0.1,0.2,0.5]
+    hidden_neurons = [50,100,200]
+    hidden_layers = [1,2,3]
+    search = [dropout,hidden_neurons,hidden_layers]
+
+    model_selection(functional=True, search_space=search,x_train=X_f_train,y_train=y_f_train)
 
     #joint model grid search
     print('--------JOINT MODEL--------')
