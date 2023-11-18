@@ -1,5 +1,6 @@
-#confidential dataset
-dataset-ABIDE-I-II
+#confidential datasets
+dataset-ABIDE-I-II/Harmonized_structural_features.csv
+dataset-ABIDE-I-II/Harmonized_functional_features.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
