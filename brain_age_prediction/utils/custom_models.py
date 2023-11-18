@@ -2,11 +2,14 @@
 functions needed to create NN models
 '''
 import os
+from pathlib import Path
 import pickle
 from keras.models import Sequential, Model
 from keras.layers import Input, Dense, Dropout, BatchNormalization, concatenate, Lambda
 from keras.regularizers import l1
 from keras.optimizers.legacy import Adam
+
+ROOT_PATH = Path(__file__).parent.parent.parent
 
 def create_structural_model(dropout, hidden_neurons, hidden_layers):
     '''
@@ -71,9 +74,9 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
     Return the compiled joint model.
     '''
     # Read dictionary pkl file
-    with open(os.path.join('brain_age_prediction','best_hyperparams','structural_model_hyperparams.pkl'), 'rb') as fp:
+    with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams','structural_model_hyperparams.pkl'), 'rb') as fp:
         s_best_hyperparams = pickle.load(fp)
-    with open(os.path.join('brain_age_prediction','best_hyperparams','functional_model_hyperparams.pkl'), 'rb') as fp:
+    with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams','functional_model_hyperparams.pkl'), 'rb') as fp:
         f_best_hyperparams = pickle.load(fp)
 
 

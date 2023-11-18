@@ -1,6 +1,7 @@
 '''
 functions useful to load the datasets and preprocess data
 '''
+from pathlib import Path
 import os
 import sys
 import pandas as pd
@@ -18,8 +19,9 @@ def load_dataset(dataset_name):
     '''
     #import dataset
     try:
-        file_path_structural = os.sep.join(['dataset-ABIDE-I-II',dataset_name])
-        df = pd.read_csv(file_path_structural)
+        path = Path(__file__)
+        file_path = os.path.join(path.parent.parent.parent,'dataset-ABIDE-I-II',dataset_name)
+        df = pd.read_csv(file_path)
     except OSError as e:
         print(f'Cannot load the dataset! \n{e}')
         sys.exit(1)

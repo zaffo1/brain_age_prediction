@@ -4,6 +4,7 @@ Retrain the selected model, and assess their performances.
 
 import sys
 import os
+from pathlib import Path
 import pickle
 import matplotlib.pyplot as plt
 from keras.callbacks import ReduceLROnPlateau
@@ -12,7 +13,7 @@ from brain_age_prediction.utils.loading_data import load_train_test
 from brain_age_prediction.utils.custom_models import (create_functional_model,
                                                       create_structural_model,
                                                       create_joint_model)
-
+ROOT_PATH = Path(__file__).parent.parent
 SEED = 7 #for reproducibility
 
 def load_model_architecture(structural=False,functional=False,joint=False):
@@ -36,7 +37,7 @@ def load_model_architecture(structural=False,functional=False,joint=False):
 
     # Read dictionary pkl file
     try:
-        with open(os.path.join('brain_age_prediction','best_hyperparams',filename), 'rb') as fp:
+        with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams',filename), 'rb') as fp:
             best_hyperparams = pickle.load(fp)
     except OSError as e:
         print('Cannot load best hyperparameters:'
@@ -71,12 +72,12 @@ def save_model(model,structural=False,functional=False,joint=False):
     model_json = model.to_json()
 
     try:
-        with open(os.path.join('brain_age_prediction','saved_models',json_name),
+        with open(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',json_name),
                    'w', encoding='utf-8') as json_file:
             json_file.write(model_json)
         # serialize weights to HDF5
 
-        model.save_weights(os.path.join('brain_age_prediction','saved_models',h5_name))
+        model.save_weights(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',h5_name))
         print("Saved model to disk")
     except OSError as e:
         print(f'Cannot save the model! \n{e}')
@@ -101,11 +102,14 @@ def plot_loss(history,loss, structural=False, functional=False, joint=False):
     plt.legend(loc='upper right')
 
     if structural:
-        plt.savefig(os.path.join('brain_age_prediction','plots','loss_structural_model.pdf'))
+        plt.savefig(os.path.join(
+            ROOT_PATH,'brain_age_prediction','plots','loss_structural_model.pdf'))
     if functional:
-        plt.savefig(os.path.join('brain_age_prediction','plots','loss_functional_model.pdf'))
+        plt.savefig(os.path.join(
+            ROOT_PATH,'brain_age_prediction','plots','loss_functional_model.pdf'))
     if joint:
-        plt.savefig(os.path.join('brain_age_prediction','plots','loss_joint_model.pdf'))
+        plt.savefig(os.path.join(
+            ROOT_PATH,'brain_age_prediction','plots','loss_joint_model.pdf'))
 
     plt.show()
 
@@ -121,21 +125,18 @@ def retrain(x_train,y_train,x_test,y_test,functional=False,structural=False,join
     model = load_model_architecture(structural,functional,joint)
 
     if structural:
-        plot_model(model, os.path.join(
+        plot_model(model, os.path.join(ROOT_PATH,
             'brain_age_prediction','plots','architecture_structural_model.png'), show_shapes=True)
     if functional:
-        plot_model(model,os.path.join(
+        plot_model(model,os.path.join(ROOT_PATH,
             'brain_age_prediction','plots','architecture_functional_model.png'), show_shapes=True)
     if joint:
-        plot_model(model, os.path.join(
+        plot_model(model, os.path.join(ROOT_PATH,
             'brain_age_prediction','plots','architecture_joint_model.png'), show_shapes=True)
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,patience=10, min_lr=0.00001)
 
-    if structural:
-        max_epochs = 200
-    if functional or joint:
-        max_epochs = 300
+    max_epochs = 200
 
     train = model.fit(x_train,
                     y_train,
