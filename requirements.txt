@@ -3,6 +3,6 @@ matplotlib
 pandas
 tensorflow
 scikeras
-sklearn
+scikit-learn
 sphinx==7.2.6
 sphinx_rtd_theme
