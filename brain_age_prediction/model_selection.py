@@ -40,8 +40,7 @@ def print_grid_search_results(grid_result,filename):
         print(f'Cannot save best hyperparameters! \n{e}')
         sys.exit(1)
 
-def model_selection(search_space, x_train,y_train,
-                    n_folds=5,functional=False,structural=False, joint=False):
+def model_selection(search_space, x_train,y_train,model_type,n_folds=5):
     '''
     function that performs k-fold cross validation in order to do model selection using grid search,
     in particular, the parameters are:
@@ -58,25 +57,21 @@ def model_selection(search_space, x_train,y_train,
 
     k_fold = KFold(n_splits=n_folds, shuffle=True, random_state=SEED)
 
-    if structural:
+    filename = f'{model_type}_model_hyperparams.pkl'
+
+    if model_type == 'structural':
         model = KerasRegressor(model=create_structural_model, verbose=0)
-        filename = 'structural_model_hyperparams.pkl'
-
-    if functional:
+    if model_type == 'functional':
         model = KerasRegressor(model=create_functional_model, verbose=0)
-        filename = 'functional_model_hyperparams.pkl'
-
-    if joint:
+    if model_type == 'joint':
         model = KerasRegressor(model=create_joint_model, verbose=0)
-        filename = 'joint_model_hyperparams.pkl'
-
 
     # define search space
-    if structural or functional:
+    if model_type in ('structural', 'functional'):
         param_grid = {'model__dropout': search_space[0],
                         'model__hidden_neurons': search_space[1],
                         'model__hidden_layers': search_space[2],}
-    elif joint:
+    elif model_type == 'joint':
         param_grid = {'model__dropout': search_space[0],
                     'model__hidden_neurons': search_space[1],
                     'model__hidden_layers': search_space[2],
@@ -101,7 +96,7 @@ def model_selection(search_space, x_train,y_train,
                                 verbose = 0,
                                 callbacks=[reduce_lr])
 
-    if joint:
+    if model_type == 'joint':
     #Only in the case of the joint model (which has a different input layer in the case
     # of model selection), create a plot showing the plot used for ms.
         joint_model = create_joint_model(dropout=grid_result.best_params_['model__dropout'],
@@ -136,8 +131,7 @@ if __name__ == "__main__":
     hidden_layers = [1,2,3,4,5]
     search = [dropout,hidden_neurons,hidden_layers]
 
-    model_selection(structural=True,
-                        search_space=search,x_train=X_s_train,y_train=y_s_train)
+    model_selection(search_space=search,x_train=X_s_train,y_train=y_s_train,model_type='structural')
 
     #functional model grid search
     print('--------FUNCTIONAL MODEL--------')
@@ -148,7 +142,7 @@ if __name__ == "__main__":
     hidden_layers = [1,2,3]
     search = [dropout,hidden_neurons,hidden_layers]
 
-    model_selection(functional=True, search_space=search,x_train=X_f_train,y_train=y_f_train)
+    model_selection(search_space=search,x_train=X_f_train,y_train=y_f_train,model_type='functional')
 
     #joint model grid search
     print('--------JOINT MODEL--------')
@@ -163,4 +157,4 @@ if __name__ == "__main__":
     hidden_layers = [1,2,3]
     search = [dropout, hidden_neurons, hidden_layers]
 
-    model_selection(joint=True, search_space=search, x_train=merged_inputs, y_train=y)
+    model_selection(search_space=search, x_train=merged_inputs, y_train=y,model_type='joint')
