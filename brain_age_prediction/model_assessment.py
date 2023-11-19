@@ -16,6 +16,20 @@ from brain_age_prediction.utils.custom_models import (create_functional_model,
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7 #for reproducibility
 
+SMALL_SIZE = 14
+MEDIUM_SIZE = 16
+BIGGER_SIZE = 18
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
+plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the figure title
+
+
+
 def load_model_architecture(model_type):
     '''
     Depending on the type of model given in input,
@@ -76,13 +90,14 @@ def plot_loss(history,loss, model_type):
     '''
     plot the loss during training, and save training curves to file
     '''
-    plt.plot(history['loss'], label='train')
-    plt.plot(history['val_loss'], label='test')
+    plt.figure(f'Loss {model_type} model',figsize=[8,6])
+    plt.plot(history['loss'], label='Train', color='black')
+    plt.plot(history['val_loss'], label='Test', color='red', linestyle='--')
 
     plt.title(f'{model_type.capitalize()} Model (Test MAE = {loss:.3} years)')
 
-    plt.xlabel('epochs')
-    plt.ylabel('loss values')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss Values')
     plt.legend(loc='upper right')
 
     plt.savefig(os.path.join(

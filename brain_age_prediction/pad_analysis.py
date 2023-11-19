@@ -15,6 +15,19 @@ from brain_age_prediction.utils.custom_models import load_model
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7
 
+SMALL_SIZE = 14
+MEDIUM_SIZE = 16
+BIGGER_SIZE = 22
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the figure suptitle
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
 
 def permutation_test(x,y,permutation_number=1000):
     '''
@@ -78,7 +91,7 @@ def td_analysis(model,df_s,df_f,model_type):
     r_td, p_td = permutation_test(y_test,y_pred.ravel())
     print(f'r = {r_td} (p={p_td})')
 
-    plt.figure(1, figsize=[12,5])
+    plt.figure('TD age prediction', figsize=[14,6])
 
     plt.suptitle(f'{model_type.capitalize()} Model')
 
@@ -151,7 +164,7 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
     r_asd, p_asd =permutation_test(y_asd,y_pred_asd.ravel())
     print(f'r = {r_asd} (p={p_asd})')
 
-    plt.figure(2, figsize=[12,5])
+    plt.figure('ASD age prediction', figsize=[14,6])
     plt.suptitle(f'{model_type.capitalize()} Model')
 
     plt.subplot(121)
@@ -197,7 +210,7 @@ def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
     '''
     t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)
 
-    plt.figure(4)
+    plt.figure('2 sample t-test', figsize=[9,7])
 
     bins = plt.hist(pad_c_td,bins=30,color='blue', alpha=0.5, density=True, label='TD')[1]
     plt.hist(pad_c_asd,bins=bins,color='red', alpha=0.5, density=True, label='ASD')
