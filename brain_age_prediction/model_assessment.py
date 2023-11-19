@@ -63,7 +63,7 @@ def load_model_architecture(model_type):
         print('Cannot load best hyperparameters:'
                f'cannot read the file in which they should be saved! \n{e}')
         sys.exit(1)
-
+    print(best_hyperparams)
     model = create_model(dropout=best_hyperparams['model__dropout'],
                          hidden_neurons=best_hyperparams['model__hidden_neurons'],
                          hidden_layers=best_hyperparams['model__hidden_layers'])
@@ -149,7 +149,7 @@ def retrain(x_train,y_train,x_test,y_test,model_type):
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,patience=10, min_lr=0.00001)
 
-    max_epochs = 200
+    max_epochs = 300
 
     train = model.fit(x_train,
                     y_train,

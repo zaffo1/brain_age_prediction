@@ -95,7 +95,7 @@ def model_selection(search_space, x_train,y_train,model_type,n_folds=5):
                     cv=k_fold,
                     verbose=3)
 
-    max_epochs = 200
+    max_epochs = 300
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,patience=10, min_lr=0.00001)
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
 
     #define search space
     dropout = [0.1,0.2,0.5]
-    hidden_neurons = [50,100,200]
+    hidden_neurons = [50,100,200,400]
     hidden_layers = [1,2,3]
     search = [dropout,hidden_neurons,hidden_layers]
 
