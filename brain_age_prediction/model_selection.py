@@ -114,7 +114,7 @@ def model_selection(search_space, x_train,y_train,model_type,n_folds=5):
                          hidden_layers=grid_result.best_params_['model__hidden_layers'],
                          model_selection=grid_result.best_params_['model__model_selection'])
 
-    plot_model(joint_model, os.path.join(ROOT_PATH,
+        plot_model(joint_model, os.path.join(ROOT_PATH,
         'brain_age_prediction','plots','architecture_joint_model_selection.png'), show_shapes=True)
 
     print_grid_search_results(grid_result,filename)
