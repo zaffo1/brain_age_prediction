@@ -15,11 +15,11 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 
 def create_structural_model(dropout, hidden_neurons, hidden_layers):
     '''
-    create (and compile) our model
+    Create (and compile) our structural model
     in order to do model selection, it takes in input 3 hyperparameters:
-    - the number of input neurons,
+    - the dropout,
     - the number of hidden neurons,
-    - the number of hiddenlayers.
+    - the number of hidden layers.
 
     it returns the compiled model using MAE as loss, and Adam with lr=0.001 as optimizer
     '''
@@ -43,9 +43,9 @@ def create_structural_model(dropout, hidden_neurons, hidden_layers):
 
 def create_functional_model(dropout, hidden_neurons, hidden_layers):
     '''
-    create (and compile) our model
+    Create (and compile) our functional model
     in order to do model selection, it takes in input 3 hyperparameters:
-    - the number of input neurons,
+    - the dropout,
     - the number of hidden neurons,
     - the number of hidden layers.
 
@@ -68,14 +68,11 @@ def create_functional_model(dropout, hidden_neurons, hidden_layers):
     model.compile(loss='mae', optimizer=optim)
     return model
 
-def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=False):
+def load_best_hyperparams():
     '''
-    join functional and structural using a concatenate layer.
-    Add another hidden layer with a number of units
-    equal to "hidden_units".
-    Return the compiled joint model.
+    Return the best hyperparameters found for both the structural and functional models.
     '''
-    # Read dictionary pkl file
+
     try:
         with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams',
                            'structural_model_hyperparams.pkl'), 'rb') as fp:
@@ -93,49 +90,65 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
                 f'cannot read the file in which they should be saved! \n{e}')
         sys.exit(1)
 
-    f_dropout=f_best_hyperparams['model__dropout']
-    f_hidden_neurons=f_best_hyperparams['model__hidden_neurons']
-    f_hidden_layers=f_best_hyperparams['model__hidden_layers']
+    return s_best_hyperparams, f_best_hyperparams
 
-    s_dropout=s_best_hyperparams['model__dropout']
-    s_hidden_neurons=s_best_hyperparams['model__hidden_neurons']
-    s_hidden_layers=s_best_hyperparams['model__hidden_layers']
+def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=False):
+    '''
+    Create the joint model. It consists of two branches which are basically the structural and
+    functional model, with hyperparameters equal to the ones individually selected during model selection.
+    These two branches are joined using a concatenate layer.
+    After the concatenate layer, add a number of hidden layers equal to 'hidden_layers', each
+    one with a number of units equal to 'hidden_units'. A dropout equal to 'dropout' is also applied, and
+    a batch normalisation.
+
+    The input 'model_selection' assumes categorical values, and it indicates if the created model
+    is to be used for model selection purposes. This needs to be specified because scikit learn wrappers
+    used to do model selection don't support multi input models. So in this case a workaround was nedded:
+    the firs layer is a single layer which takes the concatenated structural and functional features,
+    then this layer is split through Lambda layers. At this point the structure is the same as
+    described before.
+
+    Return the compiled joint model, using MAE as loss, and Adam with lr=0.001 as optimizer.
+.
+    '''
+    # load best hyperparams
+    s_best_hyperparams, f_best_hyperparams = load_best_hyperparams()
+
 
     if model_selection:
         combi_input = Input(shape=(5474,))
-        f_input = Lambda(lambda x: (x[:,:5253]))(combi_input) # (None, 1)
+        f_input = Lambda(lambda x: (x[:,:5253]))(combi_input)
         s_input = Lambda(lambda x: (x[:,5253:]))(combi_input)
 
-        model_f = (Dropout(f_dropout))(f_input)
+        model_f = (Dropout(f_best_hyperparams['model__dropout']))(f_input)
         model_f = (BatchNormalization())(model_f)
     else:
         input_f= Input(shape=(5253,))
-        model_f = (Dropout(f_dropout))(input_f)
+        model_f = (Dropout(f_best_hyperparams['model__dropout']))(input_f)
         model_f = (BatchNormalization())(model_f)
 
-    for _ in range(f_hidden_layers):
-        model_f = Dense(f_hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_f)
-        model_f = (Dropout(f_dropout))(model_f)
+    for _ in range(f_best_hyperparams['model__hidden_layers']):
+        model_f = Dense(f_best_hyperparams['model__hidden_neurons'],
+                         activation='relu',kernel_regularizer=l1(0.01))(model_f)
+        model_f = (Dropout(f_best_hyperparams['model__dropout']))(model_f)
         model_f = (BatchNormalization())(model_f)
 
     if model_selection:
-        model_s = (Dropout(s_dropout))(s_input)
+        model_s = (Dropout(s_best_hyperparams['model__dropout']))(s_input)
         model_s = (BatchNormalization())(model_s)
     else:
         input_s= Input(shape=(221,))
-        model_s = (Dropout(f_dropout))(input_s)
+        model_s = (Dropout(s_best_hyperparams['model__dropout']))(input_s)
         model_s = (BatchNormalization())(model_s)
 
-    for _ in range(s_hidden_layers):
-        model_s = Dense(s_hidden_neurons, activation='relu',kernel_regularizer=l1(0.01))(model_s)
-        model_s = (Dropout(s_dropout))(model_s)
+    for _ in range(s_best_hyperparams['model__hidden_layers']):
+        model_s = Dense(s_best_hyperparams['model__hidden_neurons'],
+                         activation='relu',kernel_regularizer=l1(0.01))(model_s)
+        model_s = (Dropout(s_best_hyperparams['model__dropout']))(model_s)
         model_s = (BatchNormalization())(model_s)
-
 
     model_concat = concatenate([model_f, model_s], axis=-1)
-    #create joint model, removing the last layers of the single models
 
-    #model_concat = concatenate([model_f.layers[-2].output, model_s.layers[-2].output], axis=-1)
     for _ in range(hidden_layers):
         model_concat = Dense(hidden_neurons, activation='relu',
                              kernel_regularizer=l1(0.01))(model_concat)
@@ -149,19 +162,19 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
     else:
         model = Model(inputs=[input_f,input_s], outputs=model_concat)
 
-
     #compile the model
-    optim = Adam(learning_rate=0.01)
-    model.compile(loss='mae', optimizer=optim)
-
+    model.compile(loss='mae', optimizer = Adam(learning_rate=0.01))
 
     return model
 
 
 def load_model(model_type):
     '''
-    Load a saved keras model and compile it,
-    return the compiled model
+    Load a saved keras model and compile it.
+    The input 'model_type' indicates which model to load:
+    either 'structural', 'functional' or 'joint'.
+
+    Return the compiled model
     '''
     try:
         check_model_type(model_type)
@@ -175,16 +188,14 @@ def load_model(model_type):
 
     # load json and create model
     try:
-        json_file         = open(os.path.join(ROOT_PATH,'brain_age_prediction',
-                                    'saved_models',json_name), 'r', encoding='utf-8')
-        loaded_model_json = json_file.read()
-        json_file.close()
+        with open(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',json_name),
+                   'r', encoding='utf-8') as json_file:
+            loaded_model_json = json_file.read()
         model = model_from_json(loaded_model_json)
     except OSError as e:
         print('Cannot load the model:'
               f'cannot read the file in which the model should be saved! \n{e}')
         sys.exit(1)
-
 
     # load weights into new model
     try:
@@ -198,4 +209,3 @@ def load_model(model_type):
     model.compile(loss='mae', optimizer=optim)
     print("Loaded model from disk")
     return model
-
