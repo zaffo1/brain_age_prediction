@@ -12,6 +12,9 @@ from sklearn.model_selection import train_test_split
 from brain_age_prediction.utils.loading_data import load_dataset, preprocessing
 from brain_age_prediction.utils.line import line
 from brain_age_prediction.utils.custom_models import load_model
+from brain_age_prediction.utils.chek_model_type import check_model_type
+
+
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7
 
@@ -66,6 +69,8 @@ def td_analysis(model,df_s,df_f,model_type):
     regression models obtained.
     In particular: ..........
     '''
+    check_model_type(model_type)
+
     x_s = preprocessing(df_s)
     x_f = preprocessing(df_f)
 
@@ -145,6 +150,8 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
     '''
     Analysis of the ASD data
     '''
+    check_model_type(model_type)
+
     #ASD
 
     if model_type == 'structural':
@@ -208,6 +215,9 @@ def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
     '''
     perform m two sample t-test
     '''
+    check_model_type(model_type)
+
+
     t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)
 
     plt.figure('2 sample t-test', figsize=[9,7])

@@ -14,6 +14,9 @@ from brain_age_prediction.utils.loading_data import load_train_test
 from brain_age_prediction.utils.custom_models import (create_functional_model,
                                                       create_structural_model,
                                                       create_joint_model)
+from brain_age_prediction.utils.chek_model_type import check_model_type
+
+
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7 #fixed for reproducibility
 
@@ -54,6 +57,8 @@ def model_selection(search_space, x_train,y_train,model_type,n_folds=5):
 
     Finally, the function saves to file the optial hyperparameters found
     '''
+    check_model_type(model_type)
+
 
     k_fold = KFold(n_splits=n_folds, shuffle=True, random_state=SEED)
 

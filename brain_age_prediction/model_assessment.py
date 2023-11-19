@@ -13,6 +13,8 @@ from brain_age_prediction.utils.loading_data import load_train_test
 from brain_age_prediction.utils.custom_models import (create_functional_model,
                                                       create_structural_model,
                                                       create_joint_model)
+from brain_age_prediction.utils.chek_model_type import check_model_type
+
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7 #for reproducibility
 
@@ -36,6 +38,8 @@ def load_model_architecture(model_type):
     load it with the best hyperparameters found and
     return the loaded model itself
     '''
+    check_model_type(model_type)
+
     filename = f'{model_type}_model_hyperparams.pkl'
 
     if model_type == 'structural':
@@ -66,6 +70,7 @@ def save_model(model,model_type):
     save model to disk
     takes in input the model
     '''
+    check_model_type(model_type)
 
     json_name = f'{model_type}_model.json'
     h5_name = f'{model_type}_model_weights.h5'
@@ -90,6 +95,8 @@ def plot_loss(history,loss, model_type):
     '''
     plot the loss during training, and save training curves to file
     '''
+    check_model_type(model_type)
+
     plt.figure(f'Loss {model_type} model',figsize=[8,6])
     plt.plot(history['loss'], label='Train', color='black')
     plt.plot(history['val_loss'], label='Test', color='red', linestyle='--')
@@ -113,6 +120,7 @@ def retrain(x_train,y_train,x_test,y_test,model_type):
     the model on the test set.
     Finally save the model to file
     '''
+    check_model_type(model_type)
 
     model = load_model_architecture(model_type)
 

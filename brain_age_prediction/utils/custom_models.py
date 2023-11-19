@@ -9,6 +9,7 @@ from keras.models import Sequential, Model, model_from_json
 from keras.layers import Input, Dense, Dropout, BatchNormalization, concatenate, Lambda
 from keras.regularizers import l1
 from keras.optimizers.legacy import Adam
+from brain_age_prediction.utils.chek_model_type import check_model_type
 
 ROOT_PATH = Path(__file__).parent.parent.parent
 
@@ -162,6 +163,7 @@ def load_model(model_type):
     Load a saved keras model and compile it,
     return the compiled model
     '''
+    check_model_type(model_type)
 
     json_name = f'{model_type}_model.json'
     h5_name   = f'{model_type}_model_weights.h5'
