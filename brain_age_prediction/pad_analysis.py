@@ -3,18 +3,15 @@ Given the ML models already trained,
 Apply them to our analysis
 '''
 import os
-import sys
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr, ttest_ind
-from keras.models import model_from_json
-from keras.optimizers.legacy import Adam
 from sklearn.model_selection import train_test_split
 from brain_age_prediction.utils.loading_data import load_dataset, preprocessing
 from brain_age_prediction.utils.line import line
-
+from brain_age_prediction.utils.custom_models import load_model
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7
 
@@ -49,75 +46,29 @@ def age_correction(a,b,cron, pred):
     return pred + (cron-(a*cron+b))
 
 
-def load_model(structural=False,functional=False, joint=False):
-    '''
-    Load a saved keras model, and compile it
-    return the compiled model
-    '''
-    if structural:
-        json_name = 'structural_model.json'
-        h5_name   = 'structural_model_weights.h5'
 
-    if functional:
-        json_name = 'functional_model.json'
-        h5_name   = 'functional_model_weights.h5'
-
-    if joint:
-        json_name = 'joint_model.json'
-        h5_name   = 'joint_model_weights.h5'
-
-
-    # load json and create model
-    try:
-        json_file         = open(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',json_name), 'r', encoding='utf-8')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        model = model_from_json(loaded_model_json)
-    except OSError as e:
-        print('Cannot load the model:'
-              f'cannot read the file in which the model should be saved! \n{e}')
-        sys.exit(1)
-
-
-    # load weights into new model
-    try:
-        model.load_weights(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',h5_name))
-    except OSError as e:
-        print('Cannot load weights into the model:'
-              f'cannot read the file in which the weights should be saved! \n{e}')
-        sys.exit(1)
-
-    optim = Adam(learning_rate = 0.001)
-    model.compile(loss='mae', optimizer=optim)
-    print("Loaded model from disk")
-    return model
-
-
-def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
-                   structural=False,functional=False,joint=False):
+def td_analysis(model,df_s,df_f,model_type):
     '''
     function that performs an analysis of the results obtained using the
     regression models obtained.
     In particular: ..........
     '''
+    x_s = preprocessing(df_s)
+    x_f = preprocessing(df_f)
 
-    x_s = preprocessing(df_s_td)
-    x_f = preprocessing(df_f_td)
-
-    y = np.array(df_s_td['AGE_AT_SCAN'])
+    y = np.array(df_s['AGE_AT_SCAN'])
 
     _, x_f_test, _, x_s_test, _, y_test = train_test_split(
         x_f,x_s, y, test_size=0.3, random_state=SEED)
 
-    if structural:
+    if model_type == 'structural':
         x_test = x_s_test
 
-    if functional:
+    if model_type == 'functional':
         x_test = x_f_test
 
-    if joint:
+    if model_type == 'joint':
         x_test = [x_f_test,x_s_test]
-
 
     #evalueate model
     score = model.evaluate(x_test, y_test, verbose=0)
@@ -128,12 +79,8 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
     print(f'r = {r_td} (p={p_td})')
 
     plt.figure(1, figsize=[12,5])
-    if structural:
-        plt.suptitle('Structural Model')
-    if functional:
-        plt.suptitle('Functional Model')
-    if joint:
-        plt.suptitle('Joint Model')
+
+    plt.suptitle(f'{model_type.capitalize()} Model')
 
     plt.subplot(121)
     plt.title('TD')
@@ -170,31 +117,32 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
     print(f'PAD_c for TD (test set) = {pad_c_td.mean()} (std {pad_c_td.std()})')
 
     plt.scatter(y_test,y_correct, color='green', alpha=0.7,
-                 label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years\nPAD = {pad_c_td.mean():.2} years')
+                 label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age (corrected) [years]')
 
     plt.legend()
-    if structural:
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','td_structural_model.pdf'))
-    if functional:
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','td_functional_model.pdf'))
-    if joint:
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','td_joint_model.pdf'))
+    plt.savefig(os.path.join(ROOT_PATH,
+                'brain_age_prediction','plots',f'td_{model_type}_model.pdf'))
 
+    return pad_c_td, popt
 
+def asd_analysis(model,df_s,df_f,popt,model_type):
+    '''
+    Analysis of the ASD data
+    '''
     #ASD
 
-    if structural:
-        x_asd = preprocessing(df_s_asd)
-    if functional:
-        x_asd = preprocessing(df_f_asd)
-    if joint:
-        x_asd = [preprocessing(df_f_asd),preprocessing(df_s_asd)]
+    if model_type == 'structural':
+        x_asd = preprocessing(df_s)
+    if model_type == 'functional':
+        x_asd = preprocessing(df_f)
+    if model_type == 'joint':
+        x_asd = [preprocessing(df_f),preprocessing(df_s)]
 
 
-    y_asd = np.array(df_s_asd['AGE_AT_SCAN'])
+    y_asd = np.array(df_s['AGE_AT_SCAN'])
     y_pred_asd = model.predict(x_asd)
 
     score_asd = model.evaluate(x_asd, y_asd, verbose=0)
@@ -204,20 +152,17 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
     print(f'r = {r_asd} (p={p_asd})')
 
     plt.figure(2, figsize=[12,5])
-    if structural:
-        plt.suptitle('Structural Model')
-    if functional:
-        plt.suptitle('Functional Model')
-    if joint:
-        plt.suptitle('Joint Model')
+    plt.suptitle(f'{model_type.capitalize()} Model')
 
     plt.subplot(121)
     plt.title('ASD')
     #plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
-    plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5, label=f'r={r_asd:.2}\nMAE = {score_asd:.3} years')
+    plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5,
+                 label=f'r={r_asd:.2}\nMAE = {score_asd:.3} years')
+    x = np.linspace(min(y_asd),max(y_asd),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
 
-
+    a, b = popt
     y_correct_asd = age_correction(a,b,cron=y_asd,pred=y_pred_asd.ravel())
     r_asd_correct, p_asd_correct =permutation_test(y_asd,y_correct_asd.ravel())
     print(f'r = {r_asd_correct} (p={p_asd_correct})')
@@ -232,24 +177,24 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
     plt.subplot(122)
     plt.title('ASD (Corrected)')
 
-    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7, label=f'r={r_asd_correct:.2}\nMAE = {score_correct_asd:.3} years\nPAD = {pad_c_asd.mean():.2} years')
+    plt.scatter(y_asd,y_correct_asd, color='purple', alpha=0.7,
+                 label=f'r={r_asd_correct:.2}\nMAE = {score_correct_asd:.3} years'
+                 f'\nPAD = {pad_c_asd.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
 
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age (corrected) [years]')
 
     plt.legend()
-    if structural:
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','asd_structural_model.pdf'))
-    if functional:
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','asd_functional_model.pdf'))
-    if joint:
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','asd_joint_model.pdf'))
+    plt.savefig(os.path.join(
+        ROOT_PATH,'brain_age_prediction','plots',f'asd_{model_type}_model.pdf'))
 
-    plt.figure(3)
-    plt.scatter(y_asd, pad_c_asd)
-    plt.hlines(y=0, xmin=0,xmax=40)
+    return pad_c_asd
 
+def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
+    '''
+    perform m two sample t-test
+    '''
     t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)
 
     plt.figure(4)
@@ -262,21 +207,11 @@ def model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,
     print(np.var(pad_c_td),np.var(pad_c_asd))
     print(t, p)
 
-    if structural:
-        plt.title(f'Structural Model\nPAD distribution (t={t:.3}, p={p:.3})')
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','PAD_distribution_structural_model.pdf'))
-
-    if functional:
-        plt.title(f'Functional Model\nPAD distribution (t={t:.3}, p={p:.3})')
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','PAD_distribution_functional_model.pdf'))
-
-    if joint:
-        plt.title(f'Joint Model\nPAD distribution (t={t:.3}, p={p:.3})')
-        plt.savefig(os.path.join(ROOT_PATH,'brain_age_prediction','plots','PAD_distribution_joint_model.pdf'))
+    plt.title(f'{model_type.capitalize()} Model\nPAD distribution (t={t:.3}, p={p:.3})')
+    plt.savefig(os.path.join(
+        ROOT_PATH,'brain_age_prediction','plots',f'PAD_distribution_{model_type}_model.pdf'))
 
     plt.show()
-
-
 
 
 if __name__ == "__main__":
@@ -285,26 +220,30 @@ if __name__ == "__main__":
     #check if GPU is available
     print("\nNum GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
-
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 
 
     #structural model
     print('--------STRUCTURAL MODEL---------')
-    model             = load_model(structural=True)
+    structural_model = load_model(model_type='structural')
 
-    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd,structural=True)
-
+    pad_td, fit_results = td_analysis(structural_model,df_s_td,df_f_td,model_type='structural')
+    pad_asd = asd_analysis(structural_model,df_s_asd,df_f_asd,fit_results,model_type='structural')
+    two_sample_t_test(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='structural')
 
     #functional model
     print('--------FUNCTIONAL MODEL---------')
-    model             = load_model(functional=True)
+    functional_model = load_model(model_type='functional')
 
-    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, functional=True)
+    pad_td, fit_results = td_analysis(functional_model,df_s_td,df_f_td,model_type='functional')
+    pad_asd = asd_analysis(functional_model,df_s_asd,df_f_asd,fit_results,model_type='functional')
+    two_sample_t_test(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='functional')
 
     #joint model
     print('--------JOINT MODEL---------')
-    model             = load_model(joint=True)
+    joint_model = load_model(model_type='joint')
 
-    model_analysis(model,df_s_td,df_s_asd,df_f_td,df_f_asd, joint=True)
+    pad_td, fit_results = td_analysis(joint_model,df_s_td,df_f_td,model_type='joint')
+    pad_asd = asd_analysis(joint_model,df_s_asd,df_f_asd,fit_results,model_type='joint')
+    two_sample_t_test(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='joint')

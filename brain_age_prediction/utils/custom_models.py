@@ -2,9 +2,10 @@
 functions needed to create NN models
 '''
 import os
+import sys
 from pathlib import Path
 import pickle
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, model_from_json
 from keras.layers import Input, Dense, Dropout, BatchNormalization, concatenate, Lambda
 from keras.regularizers import l1
 from keras.optimizers.legacy import Adam
@@ -74,11 +75,22 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
     Return the compiled joint model.
     '''
     # Read dictionary pkl file
-    with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams','structural_model_hyperparams.pkl'), 'rb') as fp:
-        s_best_hyperparams = pickle.load(fp)
-    with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams','functional_model_hyperparams.pkl'), 'rb') as fp:
-        f_best_hyperparams = pickle.load(fp)
-
+    try:
+        with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams',
+                           'structural_model_hyperparams.pkl'), 'rb') as fp:
+            s_best_hyperparams = pickle.load(fp)
+    except OSError as e:
+        print('Cannot load best hyperparams of the structural model:'
+                f'cannot read the file in which they should be saved! \n{e}')
+        sys.exit(1)
+    try:
+        with open(os.path.join(ROOT_PATH,'brain_age_prediction','best_hyperparams',
+                            'functional_model_hyperparams.pkl'), 'rb') as fp:
+            f_best_hyperparams = pickle.load(fp)
+    except OSError as e:
+        print('Cannot load best hyperparams of the functional model:'
+                f'cannot read the file in which they should be saved! \n{e}')
+        sys.exit(1)
 
     f_dropout=f_best_hyperparams['model__dropout']
     f_hidden_neurons=f_best_hyperparams['model__hidden_neurons']
@@ -143,3 +155,40 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
 
 
     return model
+
+
+def load_model(model_type):
+    '''
+    Load a saved keras model and compile it,
+    return the compiled model
+    '''
+
+    json_name = f'{model_type}_model.json'
+    h5_name   = f'{model_type}_model_weights.h5'
+
+    # load json and create model
+    try:
+        json_file         = open(os.path.join(ROOT_PATH,'brain_age_prediction',
+                                    'saved_models',json_name), 'r', encoding='utf-8')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)
+    except OSError as e:
+        print('Cannot load the model:'
+              f'cannot read the file in which the model should be saved! \n{e}')
+        sys.exit(1)
+
+
+    # load weights into new model
+    try:
+        model.load_weights(os.path.join(ROOT_PATH,'brain_age_prediction','saved_models',h5_name))
+    except OSError as e:
+        print('Cannot load weights into the model:'
+              f'cannot read the file in which the weights should be saved! \n{e}')
+        sys.exit(1)
+
+    optim = Adam(learning_rate = 0.001)
+    model.compile(loss='mae', optimizer=optim)
+    print("Loaded model from disk")
+    return model
+

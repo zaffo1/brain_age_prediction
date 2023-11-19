@@ -16,23 +16,19 @@ from brain_age_prediction.utils.custom_models import (create_functional_model,
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7 #for reproducibility
 
-def load_model_architecture(structural=False,functional=False,joint=False):
+def load_model_architecture(model_type):
     '''
     Depending on the type of model given in input,
     load it with the best hyperparameters found and
     return the loaded model itself
     '''
+    filename = f'{model_type}_model_hyperparams.pkl'
 
-    if structural:
-        filename = 'structural_model_hyperparams.pkl'
+    if model_type == 'structural':
         create_model = create_structural_model
-
-    if functional:
-        filename = 'functional_model_hyperparams.pkl'
+    if model_type == 'functional':
         create_model = create_functional_model
-
-    if joint:
-        filename = 'joint_model_hyperparams.pkl'
+    if model_type == 'joint':
         create_model = create_joint_model
 
     # Read dictionary pkl file
@@ -51,23 +47,14 @@ def load_model_architecture(structural=False,functional=False,joint=False):
 
     return model
 
-def save_model(model,structural=False,functional=False,joint=False):
+def save_model(model,model_type):
     '''
     save model to disk
     takes in input the model
     '''
 
-    if structural:
-        json_name = 'structural_model.json'
-        h5_name = 'structural_model_weights.h5'
-
-    if functional:
-        json_name = 'functional_model.json'
-        h5_name = 'functional_model_weights.h5'
-
-    if joint:
-        json_name = 'joint_model.json'
-        h5_name = 'joint_model_weights.h5'
+    json_name = f'{model_type}_model.json'
+    h5_name = f'{model_type}_model_weights.h5'
 
     # serialize model to JSON
     model_json = model.to_json()
@@ -85,37 +72,26 @@ def save_model(model,structural=False,functional=False,joint=False):
         sys.exit(1)
 
 
-def plot_loss(history,loss, structural=False, functional=False, joint=False):
+def plot_loss(history,loss, model_type):
     '''
     plot the loss during training, and save training curves to file
     '''
     plt.plot(history['loss'], label='train')
     plt.plot(history['val_loss'], label='test')
-    if structural:
-        plt.title(f'Structural Model (Test MAE = {loss:.3} years)')
-    if functional:
-        plt.title(f'Functional Model (Test MAE = {loss:.3} years)')
-    if joint:
-        plt.title(f'Joint Model (Test MAE = {loss:.3} years)')
+
+    plt.title(f'{model_type.capitalize()} Model (Test MAE = {loss:.3} years)')
 
     plt.xlabel('epochs')
     plt.ylabel('loss values')
     plt.legend(loc='upper right')
 
-    if structural:
-        plt.savefig(os.path.join(
-            ROOT_PATH,'brain_age_prediction','plots','loss_structural_model.pdf'))
-    if functional:
-        plt.savefig(os.path.join(
-            ROOT_PATH,'brain_age_prediction','plots','loss_functional_model.pdf'))
-    if joint:
-        plt.savefig(os.path.join(
-            ROOT_PATH,'brain_age_prediction','plots','loss_joint_model.pdf'))
+    plt.savefig(os.path.join(
+            ROOT_PATH,'brain_age_prediction','plots',f'loss_{model_type}_model.pdf'))
 
     plt.show()
 
 
-def retrain(x_train,y_train,x_test,y_test,functional=False,structural=False,joint=False):
+def retrain(x_train,y_train,x_test,y_test,model_type):
     '''
     Re-train the best model obtained throug model selection
     on all the available data (of the training set). Then evaluate
@@ -123,17 +99,10 @@ def retrain(x_train,y_train,x_test,y_test,functional=False,structural=False,join
     Finally save the model to file
     '''
 
-    model = load_model_architecture(structural,functional,joint)
+    model = load_model_architecture(model_type)
 
-    if structural:
-        plot_model(model, os.path.join(ROOT_PATH,
-            'brain_age_prediction','plots','architecture_structural_model.png'), show_shapes=True)
-    if functional:
-        plot_model(model,os.path.join(ROOT_PATH,
-            'brain_age_prediction','plots','architecture_functional_model.png'), show_shapes=True)
-    if joint:
-        plot_model(model, os.path.join(ROOT_PATH,
-            'brain_age_prediction','plots','architecture_joint_model.png'), show_shapes=True)
+    plot_model(model, os.path.join(ROOT_PATH,'brain_age_prediction',
+                        'plots',f'architecture_{model_type}_model.png'), show_shapes=True)
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,patience=10, min_lr=0.00001)
 
@@ -151,10 +120,8 @@ def retrain(x_train,y_train,x_test,y_test,functional=False,structural=False,join
     score = model.evaluate(x_test, y_test, verbose=0)
     print(f'TEST MAE = {score}')
     #save model to disk
-    save_model(model,structural,functional,joint)
-
-    plot_loss(history=train.history, loss=score,
-              structural=structural,functional=functional,joint=joint)
+    save_model(model,model_type)
+    plot_loss(history=train.history, loss=score, model_type=model_type)
 
 
 if __name__ == "__main__":
@@ -169,11 +136,13 @@ if __name__ == "__main__":
 
     #structural model
     print('--------STRUCTURAL MODEL---------')
-    retrain(x_train=x_s_train,y_train=y_s_train,x_test=x_s_test,y_test=y_s_test,structural=True)
+    retrain(x_train=x_s_train,y_train=y_s_train,
+            x_test=x_s_test,y_test=y_s_test,model_type='structural')
 
     #functional model
     print('--------FUNCTIONAL MODEL---------')
-    retrain(x_train=x_f_train,y_train=y_f_train,x_test=x_f_test,y_test=y_f_test,functional=True)
+    retrain(x_train=x_f_train,y_train=y_f_train,
+            x_test=x_f_test,y_test=y_f_test,model_type='functional')
 
     #joint model
     print('--------JOINT MODEL---------')
@@ -181,4 +150,4 @@ if __name__ == "__main__":
     #check if y_f_... == y_s_...
 
     retrain(x_train=[x_f_train,x_s_train],y_train=y_f_train,x_test=[x_f_test,x_s_test],
-            y_test=y_f_test,joint=True)
+            y_test=y_f_test,model_type='joint')
