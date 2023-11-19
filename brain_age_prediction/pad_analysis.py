@@ -3,6 +3,7 @@ Given the ML models already trained,
 Apply them to our analysis
 '''
 import os
+import sys
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
@@ -69,7 +70,12 @@ def td_analysis(model,df_s,df_f,model_type):
     regression models obtained.
     In particular: ..........
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
     x_s = preprocessing(df_s)
     x_f = preprocessing(df_f)
@@ -150,7 +156,12 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
     '''
     Analysis of the ASD data
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
     #ASD
 
@@ -215,7 +226,12 @@ def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
     '''
     perform m two sample t-test
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
 
     t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)

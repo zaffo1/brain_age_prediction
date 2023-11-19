@@ -38,7 +38,12 @@ def load_model_architecture(model_type):
     load it with the best hyperparameters found and
     return the loaded model itself
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
     filename = f'{model_type}_model_hyperparams.pkl'
 
@@ -70,7 +75,12 @@ def save_model(model,model_type):
     save model to disk
     takes in input the model
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
     json_name = f'{model_type}_model.json'
     h5_name = f'{model_type}_model_weights.h5'
@@ -95,7 +105,12 @@ def plot_loss(history,loss, model_type):
     '''
     plot the loss during training, and save training curves to file
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
     plt.figure(f'Loss {model_type} model',figsize=[8,6])
     plt.plot(history['loss'], label='Train', color='black')
@@ -120,7 +135,12 @@ def retrain(x_train,y_train,x_test,y_test,model_type):
     the model on the test set.
     Finally save the model to file
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
     model = load_model_architecture(model_type)
 

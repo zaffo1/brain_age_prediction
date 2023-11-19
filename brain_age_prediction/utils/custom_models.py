@@ -163,7 +163,12 @@ def load_model(model_type):
     Load a saved keras model and compile it,
     return the compiled model
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
     json_name = f'{model_type}_model.json'
     h5_name   = f'{model_type}_model_weights.h5'

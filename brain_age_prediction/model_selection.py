@@ -57,7 +57,12 @@ def model_selection(search_space, x_train,y_train,model_type,n_folds=5):
 
     Finally, the function saves to file the optial hyperparameters found
     '''
-    check_model_type(model_type)
+    try:
+        check_model_type(model_type)
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
+
 
 
     k_fold = KFold(n_splits=n_folds, shuffle=True, random_state=SEED)
