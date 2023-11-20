@@ -1,7 +1,6 @@
 '''
 Perform Model Selection for the functional model
 '''
-import os
 import time
 import datetime
 from pathlib import Path
