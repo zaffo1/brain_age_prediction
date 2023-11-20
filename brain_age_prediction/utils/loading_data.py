@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split
 
+ROOT_PATH = Path(__file__).parent.parent.parent
 
 
 def load_dataset(dataset_name):
@@ -19,8 +20,7 @@ def load_dataset(dataset_name):
     '''
     #import dataset
     try:
-        path = Path(__file__)
-        file_path = os.path.join(path.parent.parent.parent,'dataset-ABIDE-I-II',dataset_name)
+        file_path = os.path.join(ROOT_PATH,'dataset-ABIDE-I-II',dataset_name)
         df = pd.read_csv(file_path)
     except OSError as e:
         print(f'Cannot load the dataset! \n{e}')

@@ -154,7 +154,7 @@ def retrain(x_train,y_train,x_test,y_test,model_type):
     train = model.fit(x_train,
                     y_train,
                     epochs=max_epochs,
-                    batch_size=32,
+                    batch_size=64,
                     verbose=1,
                     validation_data=(x_test,y_test),
                     callbacks=[reduce_lr])
@@ -169,6 +169,7 @@ def retrain(x_train,y_train,x_test,y_test,model_type):
 
 if __name__ == "__main__":
     import tensorflow as tf
+    tf.keras.backend.clear_session()
 
     #check if GPU is available
     print("\nNum GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -191,8 +192,6 @@ if __name__ == "__main__":
 
     #joint model
     print('--------JOINT MODEL---------')
-
-    #check if y_f_... == y_s_...
 
     retrain(x_train=[x_f_train,x_s_train],y_train=y_f_train,x_test=[x_f_test,x_s_test],
             y_test=y_f_test,model_type='joint')
