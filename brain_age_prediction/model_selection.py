@@ -18,7 +18,6 @@ from brain_age_prediction.utils.custom_models import (create_functional_model,
                                                       create_joint_model)
 from brain_age_prediction.utils.chek_model_type import check_model_type
 
-
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7 #fixed for reproducibility
 
@@ -104,7 +103,7 @@ def model_selection(search_space, x_train,y_train,model_type,n_folds=5):
     grid_result = grid_search.fit(x_train,
                                 y_train,
                                 epochs = max_epochs,
-                                batch_size=64,
+                                batch_size=32,
                                 verbose = 0,
                                 callbacks=[reduce_lr])
 
@@ -131,7 +130,6 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-
     #load data
     X_s_train, X_s_test, y_s_train, y_s_test, X_f_train, X_f_test, y_f_train, y_f_test  =(
         load_train_test(split=0.3,seed=SEED))
@@ -147,6 +145,7 @@ if __name__ == "__main__":
     search = [dropout,hidden_neurons,hidden_layers]
 
     model_selection(search_space=search,x_train=X_s_train,y_train=y_s_train,model_type='structural')
+    tf.keras.backend.clear_session()
 
     #functional model grid search
     print('--------FUNCTIONAL MODEL--------')
@@ -158,6 +157,7 @@ if __name__ == "__main__":
     search = [dropout,hidden_neurons,hidden_layers]
 
     model_selection(search_space=search,x_train=X_f_train,y_train=y_f_train,model_type='functional')
+    tf.keras.backend.clear_session()
 
     #joint model grid search
     print('--------JOINT MODEL--------')
@@ -173,6 +173,7 @@ if __name__ == "__main__":
     search = [dropout, hidden_neurons, hidden_layers]
 
     model_selection(search_space=search, x_train=merged_inputs, y_train=y,model_type='joint')
+    tf.keras.backend.clear_session()
 
     elapsed_seconds = time.time() - start_time
     print('Einished model selection...'

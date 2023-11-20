@@ -154,7 +154,7 @@ def retrain(x_train,y_train,x_test,y_test,model_type):
     train = model.fit(x_train,
                     y_train,
                     epochs=max_epochs,
-                    batch_size=64,
+                    batch_size=32,
                     verbose=1,
                     validation_data=(x_test,y_test),
                     callbacks=[reduce_lr])
@@ -181,11 +181,13 @@ if __name__ == "__main__":
     print('--------STRUCTURAL MODEL---------')
     retrain(x_train=x_s_train,y_train=y_s_train,
             x_test=x_s_test,y_test=y_s_test,model_type='structural')
+    tf.keras.backend.clear_session()
 
     #functional model
     print('--------FUNCTIONAL MODEL---------')
     retrain(x_train=x_f_train,y_train=y_f_train,
             x_test=x_f_test,y_test=y_f_test,model_type='functional')
+    tf.keras.backend.clear_session()
 
     #joint model
     print('--------JOINT MODEL---------')
@@ -194,3 +196,4 @@ if __name__ == "__main__":
 
     retrain(x_train=[x_f_train,x_s_train],y_train=y_f_train,x_test=[x_f_test,x_s_test],
             y_test=y_f_test,model_type='joint')
+    tf.keras.backend.clear_session()
