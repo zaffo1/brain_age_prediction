@@ -13,7 +13,6 @@ SEED = 7 #fixed for reproducibility
 
 
 if __name__ == "__main__":
-    import numpy as np
     import tensorflow as tf
 
     #check if GPU is available
