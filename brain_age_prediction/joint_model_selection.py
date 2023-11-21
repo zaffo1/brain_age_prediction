@@ -14,6 +14,7 @@ SEED = 7 #fixed for reproducibility
 
 if __name__ == "__main__":
     import tensorflow as tf
+    import numpy as np
 
     #check if GPU is available
     print("\nNum GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
