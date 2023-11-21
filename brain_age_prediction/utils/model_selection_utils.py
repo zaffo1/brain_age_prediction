@@ -15,7 +15,7 @@ from brain_age_prediction.utils.custom_models import (create_functional_model,
                                                       create_joint_model)
 from brain_age_prediction.utils.chek_model_type import check_model_type
 
-ROOT_PATH = Path(__file__).parent.parent
+ROOT_PATH = Path(__file__).parent.parent.parent
 SEED = 7 #fixed for reproducibility
 
 def print_grid_search_results(grid_result,filename):

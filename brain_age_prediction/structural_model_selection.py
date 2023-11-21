@@ -7,7 +7,7 @@ from pathlib import Path
 from brain_age_prediction.utils.loading_data import load_train_test
 from brain_age_prediction.utils.model_selection_utils import model_selection
 
-ROOT_PATH = Path(__file__).parent.parent.parent
+ROOT_PATH = Path(__file__).parent.parent
 SEED = 7 #fixed for reproducibility
 
 
