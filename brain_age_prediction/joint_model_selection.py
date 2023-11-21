@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
 
     dropout = [0.1,0.2,0.5]
-    hidden_neurons = [50,100,150,200]
+    hidden_neurons = [50,100,200,300]
     hidden_layers = [1,2,3]
     search = [dropout, hidden_neurons, hidden_layers]
 
