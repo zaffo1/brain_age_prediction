@@ -141,7 +141,8 @@ def td_analysis(model,df_s,df_f,model_type):
     print(f'PAD_c for TD (test set) = {pad_c_td.mean()} (std {pad_c_td.std()})')
 
     plt.scatter(y_test,y_correct, color='green', alpha=0.7,
-                 label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years')
+                 label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years'
+                 f'\nPAD = {pad_c_td.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age (corrected) [years]')
@@ -187,7 +188,6 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
 
     plt.subplot(121)
     plt.title('ASD')
-    #plt.scatter(y_test,y_pred, color='blue', alpha=0.7, label=f'TD, r={r_td:.2}')
     plt.scatter(y_asd,y_pred_asd, color='red', alpha =0.5,
                  label=f'r={r_asd:.2}\nMAE = {score_asd:.3} years')
     x = np.linspace(min(y_asd),max(y_asd),1000)
@@ -199,7 +199,7 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
     print(f'r = {r_asd_correct} (p={p_asd_correct})')
 
     score_correct_asd = model.evaluate(x_asd, y_correct_asd, verbose=0)
-    pad_c_asd = ((y_pred_asd.ravel()-b)/a) - y_asd
+    pad_c_asd = y_correct_asd - y_asd
     print(f'PAD_c for ASD = {pad_c_asd.mean()} (std = {pad_c_asd.std()})')
     plt.xlabel('Chronological Age [years]')
     plt.ylabel('Predicted Age [years]')
@@ -220,11 +220,53 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
     plt.savefig(os.path.join(
         ROOT_PATH,'brain_age_prediction','plots',f'asd_{model_type}_model.pdf'))
 
+    plt.figure('prova',figsize=[10,5])
+    plt.scatter(y_asd,pad_c_asd, color='purple', marker='.')
+    plt.axhline(y = 0, color = 'grey', linestyle = '--')
+    plt.xlabel('Chronological Age [years]')
+    plt.ylabel('PAD [years]')
+    plt.title(f'{model_type}')
+    plt.savefig(os.path.join(
+        ROOT_PATH,'brain_age_prediction','plots',f'prova_PAD_{model_type}.pdf'))
+
     return pad_c_asd
 
-def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
+
+def empirical_p_value(group1, group2, num_permutations=1000):
     '''
-    perform a two sample t-test
+    empirical p value
+    '''
+    # Observed test statistic (difference in means)
+    observed_statistic = np.mean(group2) - np.mean(group1)
+
+    # Initialize array to store permuted test statistics
+    permuted_statistics = np.zeros(num_permutations)
+
+    # Perform permutations and calculate permuted test statistics
+    for i in range(num_permutations):
+        # Concatenate and randomly permute the data
+        combined_data = np.concatenate((group1, group2))
+        np.random.shuffle(combined_data)
+
+        # Split permuted data into two groups
+        permuted_group1 = combined_data[:len(group1)]
+        permuted_group2 = combined_data[len(group1):]
+
+        # Calculate test statistic for permuted data
+        permuted_statistic = np.mean(permuted_group2) - np.mean(permuted_group1)
+
+        # Store permuted statistic
+        permuted_statistics[i] = permuted_statistic
+
+    # Calculate p-value
+    p_value = np.sum(np.abs(permuted_statistics) >= np.abs(observed_statistic)) / num_permutations
+
+    print("Empirical p-value:", p_value)
+    return p_value
+
+def plot_distributions(pad_c_td, pad_c_asd, model_type):
+    '''
+    plot PAD distributions
     '''
     try:
         check_model_type(model_type)
@@ -234,29 +276,34 @@ def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
 
 
     # Shapiro-Wilk test
-    _, p_td = shapiro(pad_c_td)
-    _, p_asd = shapiro(pad_c_asd)
-    print(f'Shapiro test of normality: p value td: {p_td}, asd: {p_asd}')
+    #_, p_td = shapiro(pad_c_td)
+    #_, p_asd = shapiro(pad_c_asd)
+    #print(f'Shapiro test of normality: p value td: {p_td}, asd: {p_asd}')
 
     #check variances of the two distrivution
     print(f'variance td: {np.var(pad_c_td)}, variance asd: {np.var(pad_c_asd)}')
 
-    t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)
+    #t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)
 
-    plt.figure('2 sample t-test', figsize=[9,7])
+    # empirical p value
+    p_val = empirical_p_value(pad_c_td, pad_c_asd)
 
-    bins = plt.hist(pad_c_td,bins=30,color='blue', alpha=0.5, density=True, label='TD')[1]
-    plt.hist(pad_c_asd,bins=bins,color='red', alpha=0.5, density=True, label='ASD')
+    plt.figure('PAD distributions', figsize=[9,7])
+
+    bins = plt.hist(pad_c_td,bins=30,color='blue',
+                     alpha=0.5, density=True, label= f'TD (mean = {np.mean(pad_c_td):.2})')[1]
+    plt.hist(pad_c_asd,bins=bins,color='red',
+              alpha=0.5, density=True, label= f'ASD (mean = {np.mean(pad_c_asd):.2})')
     plt.xlabel('PAD [years]')
     plt.ylabel('Relative Frequency')
     plt.legend()
-    print(f't test results: t: {t}, p_value: {p}')
 
-    plt.title(f'{model_type.capitalize()} Model\nPAD distribution (t={t:.3}, p={p:.3})')
+    plt.title(f'{model_type.capitalize()} Model\nPAD distribution (empirical p={p_val:.3})')
     plt.savefig(os.path.join(
         ROOT_PATH,'brain_age_prediction','plots',f'PAD_distribution_{model_type}_model.pdf'))
 
     plt.show()
+
 
 
 if __name__ == "__main__":
@@ -275,7 +322,7 @@ if __name__ == "__main__":
 
     pad_td, fit_results = td_analysis(structural_model,df_s_td,df_f_td,model_type='structural')
     pad_asd = asd_analysis(structural_model,df_s_asd,df_f_asd,fit_results,model_type='structural')
-    two_sample_t_test(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='structural')
+    plot_distributions(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='structural')
 
     #functional model
     print('--------FUNCTIONAL MODEL---------')
@@ -283,7 +330,7 @@ if __name__ == "__main__":
 
     pad_td, fit_results = td_analysis(functional_model,df_s_td,df_f_td,model_type='functional')
     pad_asd = asd_analysis(functional_model,df_s_asd,df_f_asd,fit_results,model_type='functional')
-    two_sample_t_test(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='functional')
+    plot_distributions(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='functional')
 
     #joint model
     print('--------JOINT MODEL---------')
@@ -291,4 +338,4 @@ if __name__ == "__main__":
 
     pad_td, fit_results = td_analysis(joint_model,df_s_td,df_f_td,model_type='joint')
     pad_asd = asd_analysis(joint_model,df_s_asd,df_f_asd,fit_results,model_type='joint')
-    two_sample_t_test(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='joint')
+    plot_distributions(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='joint')
