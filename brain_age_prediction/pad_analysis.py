@@ -82,24 +82,29 @@ def td_analysis(model,df_s,df_f,model_type):
 
     y = np.array(df_s['AGE_AT_SCAN'])
 
-    _, x_f_test, _, x_s_test, _, y_test = train_test_split(
+    x_f_train, x_f_test, x_s_train, x_s_test, y_train, y_test = train_test_split(
         x_f,x_s, y, test_size=0.3, random_state=SEED)
 
     if model_type == 'structural':
         x_test = x_s_test
+        x_train = x_s_train
 
     if model_type == 'functional':
         x_test = x_f_test
+        x_train = x_f_train
 
     if model_type == 'joint':
         x_test = [x_f_test,x_s_test]
+        x_train = [x_f_train,x_s_train]
 
-    #evalueate model
+    #evaluate model
     score = model.evaluate(x_test, y_test, verbose=0)
-    print(f'TD TEST MAE = {score}')
-    y_pred = model.predict(x_test)
 
+    print(f'TD TEST MAE (no correction)= {score}')
+    y_pred = model.predict(x_test)
+    y_pred_train = model.predict(x_train)
     r_td, p_td = permutation_test(y_test,y_pred.ravel())
+
     print(f'r = {r_td} (p={p_td})')
 
     plt.figure('TD age prediction', figsize=[14,6])
@@ -107,15 +112,18 @@ def td_analysis(model,df_s,df_f,model_type):
     plt.suptitle(f'{model_type.capitalize()} Model')
 
     plt.subplot(121)
-    plt.title('TD')
+    plt.title('TD (Train)')
 
-    plt.scatter(y_test,y_pred, color='blue', alpha=0.7,
-                 label=f'r={r_td:.2}\nMAE = {score:.3} years')
+    #plt.scatter(y_test,y_pred, color='blue', alpha=0.7,
+    #             label=f'test set: r={r_td:.2}, MAE = {score:.3} years')
+
+    plt.scatter(y_train,y_pred_train, color='cyan', alpha=0.7, label='train (fit performed on these data)')
+
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
 
     #fit
-    popt, _ = curve_fit(line, y_test, y_pred.ravel())
+    popt, _ = curve_fit(line, y_train, y_pred_train.ravel())
     a, b = popt
     print(f'a = {popt[0]}, b={popt[1]}')
 
@@ -127,7 +135,7 @@ def td_analysis(model,df_s,df_f,model_type):
     plt.legend()
     plt.subplot(122)
 
-    plt.title('TD (Corrected)')
+    plt.title('TD (Test) (Corrected)')
     y_correct = age_correction(a,b,cron=y_test,pred=y_pred.ravel())
 
     r_td_correct, p_td_correct =permutation_test(y_test,y_correct.ravel())
@@ -141,7 +149,7 @@ def td_analysis(model,df_s,df_f,model_type):
     print(f'PAD_c for TD (test set) = {pad_c_td.mean()} (std {pad_c_td.std()})')
 
     plt.scatter(y_test,y_correct, color='green', alpha=0.7,
-                 label=f'r={r_td_correct:.2}\nMAE = {score_correct:.3} years'
+                 label=f'test set corrected\nr={r_td_correct:.2}\nMAE = {score_correct:.3} years'
                  f'\nPAD = {pad_c_td.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.xlabel('Chronological Age [years]')
