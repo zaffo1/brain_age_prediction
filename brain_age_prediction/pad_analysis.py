@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from scipy.stats import pearsonr, ttest_ind
+from scipy.stats import pearsonr, ttest_ind, shapiro
 from sklearn.model_selection import train_test_split
 from brain_age_prediction.utils.loading_data import load_dataset, preprocessing
 from brain_age_prediction.utils.line import line
@@ -224,7 +224,7 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
 
 def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
     '''
-    perform m two sample t-test
+    perform a two sample t-test
     '''
     try:
         check_model_type(model_type)
@@ -233,6 +233,13 @@ def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
         sys.exit(1)
 
 
+    # Shapiro-Wilk test
+    _, p_td = shapiro(pad_c_td)
+    _, p_asd = shapiro(pad_c_asd)
+    print(f'Shapiro test of normality: p value td: {p_td}, asd: {p_asd}')
+
+    #check variances of the two distrivution
+    print(f'variance td: {np.var(pad_c_td)}, variance asd: {np.var(pad_c_asd)}')
 
     t, p = ttest_ind(a=pad_c_asd, b=pad_c_td, equal_var=True)
 
@@ -243,8 +250,7 @@ def two_sample_t_test(pad_c_td, pad_c_asd, model_type):
     plt.xlabel('PAD [years]')
     plt.ylabel('Relative Frequency')
     plt.legend()
-    print(np.var(pad_c_td),np.var(pad_c_asd))
-    print(t, p)
+    print(f't test results: t: {t}, p_value: {p}')
 
     plt.title(f'{model_type.capitalize()} Model\nPAD distribution (t={t:.3}, p={p:.3})')
     plt.savefig(os.path.join(
