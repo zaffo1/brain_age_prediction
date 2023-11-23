@@ -117,7 +117,7 @@ def td_analysis(model,df_s,df_f,model_type):
     #plt.scatter(y_test,y_pred, color='blue', alpha=0.7,
     #             label=f'test set: r={r_td:.2}, MAE = {score:.3} years')
 
-    plt.scatter(y_train,y_pred_train, color='cyan', alpha=0.7, label='train (fit performed on these data)')
+    plt.scatter(y_train,y_pred_train, color='blue', alpha=0.7, label='Train')
 
     x = np.linspace(min(y_test),max(y_test),1000)
     plt.plot(x,x, color = 'grey', linestyle='--')
@@ -149,7 +149,7 @@ def td_analysis(model,df_s,df_f,model_type):
     print(f'PAD_c for TD (test set) = {pad_c_td.mean()} (std {pad_c_td.std()})')
 
     plt.scatter(y_test,y_correct, color='green', alpha=0.7,
-                 label=f'test set corrected\nr={r_td_correct:.2}\nMAE = {score_correct:.3} years'
+                 label=f'Test (corrected)\nr={r_td_correct:.2}\nMAE = {score_correct:.3} years'
                  f'\nPAD = {pad_c_td.mean():.2} years')
     plt.plot(x,x, color = 'grey', linestyle='--')
     plt.xlabel('Chronological Age [years]')
