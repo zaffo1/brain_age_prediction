@@ -101,7 +101,7 @@ def save_model(model,model_type):
         sys.exit(1)
 
 
-def plot_loss(history,loss, model_type):
+def plot_loss(history, model_type):
     '''
     plot the loss during training, and save training curves to file
     '''
@@ -116,7 +116,7 @@ def plot_loss(history,loss, model_type):
     plt.plot(history['loss'], label='Train', color='black')
     plt.plot(history['val_loss'], label='Test', color='red', linestyle='--')
 
-    plt.title(f'{model_type.capitalize()} Model (Test MAE = {loss:.3} years)')
+    plt.title(f'{model_type.capitalize()} Model')
 
     plt.xlabel('Epochs')
     plt.ylabel('Loss Values')
@@ -161,10 +161,10 @@ def retrain(x_train,y_train,x_test,y_test,model_type):
 
     #evaluate model
     score = model.evaluate(x_test, y_test, verbose=0)
-    print(f'TEST MAE = {score}')
+    print(f'TEST LOSS = {score}')
     #save model to disk
     save_model(model,model_type)
-    plot_loss(history=train.history, loss=score, model_type=model_type)
+    plot_loss(history=train.history, model_type=model_type)
 
 
 if __name__ == "__main__":
