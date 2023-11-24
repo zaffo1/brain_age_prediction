@@ -136,7 +136,7 @@ def td_analysis(model,df_s,df_f,model_type):
     plt.subplot(122)
 
     plt.title('TD (Test) (Corrected)')
-    y_correct = age_correction(a,b,cron=y_test,pred=y_pred.ravel())
+    y_correct = y_pred.ravel() #age_correction(a,b,cron=y_test,pred=y_pred.ravel())
 
     r_td_correct, p_td_correct =permutation_test(y_test,y_correct.ravel())
     print(f'r = {r_td_correct} (p={p_td_correct})')
@@ -202,7 +202,7 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
     plt.plot(x,x, color = 'grey', linestyle='--')
 
     a, b = popt
-    y_correct_asd = age_correction(a,b,cron=y_asd,pred=y_pred_asd.ravel())
+    y_correct_asd = y_pred_asd.ravel() #age_correction(a,b,cron=y_asd,pred=y_pred_asd.ravel())
     r_asd_correct, p_asd_correct =permutation_test(y_asd,y_correct_asd.ravel())
     print(f'r = {r_asd_correct} (p={p_asd_correct})')
 
@@ -240,7 +240,7 @@ def asd_analysis(model,df_s,df_f,popt,model_type):
     return pad_c_asd
 
 
-def empirical_p_value(group1, group2, num_permutations=1000):
+def empirical_p_value(group1, group2, num_permutations=100000):
     '''
     empirical p value
     '''
@@ -306,7 +306,7 @@ def plot_distributions(pad_c_td, pad_c_asd, model_type):
     plt.ylabel('Relative Frequency')
     plt.legend()
 
-    plt.title(f'{model_type.capitalize()} Model\nPAD distribution (empirical p={p_val:.3})')
+    plt.title(f'{model_type.capitalize()} Model\nPAD distribution (empirical p={p_val:.2})')
     plt.savefig(os.path.join(
         ROOT_PATH,'brain_age_prediction','plots',f'PAD_distribution_{model_type}_model.pdf'))
 
