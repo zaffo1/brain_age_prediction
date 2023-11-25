@@ -17,15 +17,14 @@ def create_structural_model(dropout, hidden_neurons, hidden_layers):
     '''
     Creates and compiles the structural model.
 
-    Args:
-        dropout (float): The dropout rate for regularization.
-        hidden_neurons (int): The number of neurons in each hidden layer.
-        hidden_layers (int): The number of hidden layers.
+    : param float dropout : The dropout rate for regularization.
+    : param int hidden_neurons : The number of neurons in each hidden layer.
+    : param int hidden_layers : The number of hidden layers.
 
-    Returns:
-        keras.models.Sequential: The compiled model with MAE
-                                 as the loss function and Adam
-                                 optimizer with lr=0.001.
+    :return: The compiled model with MAE
+             as the loss function and Adam
+             optimizer with lr=0.001.
+    :rtype: keras.models.Sequential
     '''
     model = Sequential()
     model.add(Input(shape=(221,)))
