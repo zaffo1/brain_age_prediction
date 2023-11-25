@@ -12,7 +12,8 @@ def check_model_type(model_type):
 
     :raises AssertionError: If 'model_type' is not one of 'structural', 'functional', or 'joint'.
 
-    This function ensures that the provided 'model_type' is one of the allowed values: 'structural', 'functional', or 'joint'.
+    This function ensures that the provided 'model_type' is one of
+    the allowed values: 'structural', 'functional', or 'joint'.
     If 'model_type' is not valid, an AssertionError is raised with a descriptive error message.
     '''
 
