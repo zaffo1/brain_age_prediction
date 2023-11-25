@@ -44,6 +44,14 @@ brain\_age\_prediction.utils.model\_selection\_utils module
    :undoc-members:
    :show-inheritance:
 
+brain\_age\_prediction.utils.stats\_utils module
+------------------------------------------------
+
+.. automodule:: brain_age_prediction.utils.stats_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
