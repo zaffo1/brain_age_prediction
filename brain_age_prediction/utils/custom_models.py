@@ -46,13 +46,14 @@ def create_structural_model(dropout, hidden_neurons, hidden_layers):
 
 def create_functional_model(dropout, hidden_neurons, hidden_layers):
     '''
-    Create (and compile) our functional model
-    in order to do model selection, it takes in input 3 hyperparameters:
-    - the dropout,
-    - the number of hidden neurons,
-    - the number of hidden layers.
+    Creates and compiles the functional model.
 
-    it returns the compiled model using MAE as loss, and Adam with lr=0.001 as optimizer
+    :param float dropout: The dropout rate for regularization.
+    :param int hidden_neurons: The number of neurons in each hidden layer.
+    :param int hidden_layers: The number of hidden layers.
+
+    :return: The compiled model with MAE as the loss function and Adam optimizer with lr=0.001.
+    :rtype: keras.models.Sequential
     '''
     model = Sequential()
     model.add(Input(shape=(5253,)))
