@@ -34,7 +34,7 @@ plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the figure title
 
 def load_model_architecture(model_type):
     '''
-    Depending on the type of model given in input,
+    provaDepending on the type of model given in input,
     load it with the best hyperparameters found and
     return the loaded model itself
 
