@@ -12,10 +12,26 @@ Subpackages
 Submodules
 ----------
 
-brain\_age\_prediction.model\_analysis module
----------------------------------------------
+brain\_age\_prediction.functional\_model\_selection module
+----------------------------------------------------------
 
-.. automodule:: brain_age_prediction.model_analysis
+.. automodule:: brain_age_prediction.functional_model_selection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+brain\_age\_prediction.joint\_model\_selection module
+-----------------------------------------------------
+
+.. automodule:: brain_age_prediction.joint_model_selection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+brain\_age\_prediction.mae\_analysis module
+-------------------------------------------
+
+.. automodule:: brain_age_prediction.mae_analysis
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,10 +44,18 @@ brain\_age\_prediction.model\_assessment module
    :undoc-members:
    :show-inheritance:
 
-brain\_age\_prediction.model\_selection module
-----------------------------------------------
+brain\_age\_prediction.pad\_analysis module
+-------------------------------------------
 
-.. automodule:: brain_age_prediction.model_selection
+.. automodule:: brain_age_prediction.pad_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+brain\_age\_prediction.structural\_model\_selection module
+----------------------------------------------------------
+
+.. automodule:: brain_age_prediction.structural_model_selection
    :members:
    :undoc-members:
    :show-inheritance:
