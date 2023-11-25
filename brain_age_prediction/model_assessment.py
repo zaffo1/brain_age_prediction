@@ -1,5 +1,6 @@
 '''
-Retrain the selected model, and assess their performances.
+Retrain the selected model on the entirety of the training se,
+and assess its performances on the test set.
 '''
 
 import sys
@@ -31,12 +32,14 @@ plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
 plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the figure title
 
 
-
 def load_model_architecture(model_type):
     '''
     Depending on the type of model given in input,
     load it with the best hyperparameters found and
     return the loaded model itself
+
+    :param string model_type: string indicating the model type
+                             ('structural', 'functional' or 'joint') to load
     '''
     try:
         check_model_type(model_type)
