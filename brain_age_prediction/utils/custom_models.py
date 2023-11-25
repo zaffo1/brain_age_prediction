@@ -15,13 +15,17 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 
 def create_structural_model(dropout, hidden_neurons, hidden_layers):
     '''
-    Create (and compile) our structural model
-    in order to do model selection, it takes in input 3 hyperparameters:
-    - the dropout,
-    - the number of hidden neurons,
-    - the number of hidden layers.
+    Creates and compiles the structural model.
 
-    it returns the compiled model using MAE as loss, and Adam with lr=0.001 as optimizer
+    Args:
+        dropout (float): The dropout rate for regularization.
+        hidden_neurons (int): The number of neurons in each hidden layer.
+        hidden_layers (int): The number of hidden layers.
+
+    Returns:
+        keras.models.Sequential: The compiled model with MAE
+                                 as the loss function and Adam
+                                 optimizer with lr=0.001.
     '''
     model = Sequential()
     model.add(Input(shape=(221,)))
