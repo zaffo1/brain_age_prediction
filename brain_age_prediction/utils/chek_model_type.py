@@ -6,11 +6,14 @@ has an accepted value. In particular, it should be a string that can only be:
 
 def check_model_type(model_type):
     '''
-    Check if 'model_type' is either 'structural', 'functional' or 'joint'
-    If not, raise an AssertionError
+    Check if the specified 'model_type' is valid.
 
-        Parameters:
-                    model_type (string): the string indicating the model type
+    :param str model_type: String indicating the model type.
+
+    :raises AssertionError: If 'model_type' is not one of 'structural', 'functional', or 'joint'.
+
+    This function ensures that the provided 'model_type' is one of the allowed values: 'structural', 'functional', or 'joint'.
+    If 'model_type' is not valid, an AssertionError is raised with a descriptive error message.
     '''
 
     assert model_type in ('structural','functional','joint'),(

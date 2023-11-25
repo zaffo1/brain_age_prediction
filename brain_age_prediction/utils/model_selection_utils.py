@@ -20,9 +20,16 @@ SEED = 7 #fixed for reproducibility
 
 def print_grid_search_results(grid_result,filename):
     '''
-    prints the results of the grid search, and saves them to file:
-    takes in input the output of grid_search.fit, and the name to assign to the saved file.
+    Prints the results of the grid search and saves them to a file.
+
+    :param grid_result: The output of grid_search.fit.
+    :param str filename: The name to assign to the saved file.
+
+    This function prints the best score and parameters found during a grid search,
+    along with the mean and standard deviation of test scores for each combination
+    of hyperparameters. It also saves the best hyperparameters to a file.
     '''
+
     print(f'Best: {grid_result.best_score_} using {grid_result.best_params_}')
     means = grid_result.cv_results_['mean_test_score']
     stds = grid_result.cv_results_['std_test_score']
@@ -43,18 +50,20 @@ def print_grid_search_results(grid_result,filename):
 
 def model_selection(search_space, x_train,y_train,model_type,max_epochs=300):
     '''
-    function that performs k-fold cross validation in order to do model selection using grid search,
-    in particular, the parameters are:
+    Perform k-fold cross-validation for model selection using grid search.
 
-    search_space: a list of lists that defines the combination of possible hyperparameters
-    x_train: input features
-    y_train: targets
-    n_folds: number of folds of the k-fold cross validarion (default=5)
-    functional: if True, consider the functional model (default=False)
-    structural: if True, consider the structural model (default=False)
+    :param list search_space: A list of lists defining the combination of possible hyperparameters.
+    :param numpy.ndarray x_train: Input features.
+    :param numpy.ndarray y_train: Targets.
+    :param str model_type: The type of model to perform model
+                           selection for ('structural', 'functional', or 'joint').
+    :param int max_epochs: Maximum number of training epochs (default=300).
 
-    Finally, the function saves to file the optial hyperparameters found
+    This function performs k-fold cross-validation using grid search to
+    find the optimal hyperparameters
+    for the specified model type. It saves the optimal hyperparameters to a file.
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:

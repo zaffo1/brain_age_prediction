@@ -21,10 +21,14 @@ def create_structural_model(dropout, hidden_neurons, hidden_layers):
     :param int hidden_neurons: The number of neurons in each hidden layer.
     :param int hidden_layers: The number of hidden layers.
 
-    :return: The compiled model with MAE
-             as the loss function and Adam
-             optimizer with lr=0.001.
+    :return: The compiled model with Mean Absolute Error (MAE) as the loss function
+             and Adam optimizer with a learning rate of 0.001.
     :rtype: keras.models.Sequential
+
+    This function constructs a sequential neural network model with dropout
+    regularization, batch normalization, and specified hidden layers and neurons.
+    The output layer has a linear activation function, and the model is compiled
+    using the Mean Absolute Error (MAE) loss function and the Adam optimizer.
     '''
     model = Sequential()
     model.add(Input(shape=(221,)))
@@ -46,14 +50,20 @@ def create_structural_model(dropout, hidden_neurons, hidden_layers):
 
 def create_functional_model(dropout, hidden_neurons, hidden_layers):
     '''
-    Creates and compiles the functional model.
+    Create and compile a functional model.
 
     :param float dropout: The dropout rate for regularization.
     :param int hidden_neurons: The number of neurons in each hidden layer.
     :param int hidden_layers: The number of hidden layers.
 
-    :return: The compiled model with MAE as the loss function and Adam optimizer with lr=0.001.
+    :return: The compiled model with Mean Absolute Error (MAE) as the loss function
+             and Adam optimizer with a learning rate of 0.001.
     :rtype: keras.models.Sequential
+
+    This function constructs a sequential neural network model with dropout
+    regularization, batch normalization, and specified hidden layers and neurons.
+    The output layer has a linear activation function, and the model is compiled
+    using the Mean Absolute Error (MAE) loss function and the Adam optimizer.
     '''
 
     model = Sequential()
@@ -76,6 +86,13 @@ def create_functional_model(dropout, hidden_neurons, hidden_layers):
 def load_best_hyperparams():
     '''
     Return the best hyperparameters found for both the structural and functional models.
+
+    :return: Tuple containing the best hyperparameters for the structural and functional models.
+    :rtype: tuple
+
+    This function loads and returns the best hyperparameters found for both the structural and
+    functional models.
+    The hyperparameters are stored in separate pickle files.
     '''
 
     try:
@@ -99,23 +116,38 @@ def load_best_hyperparams():
 
 def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=False):
     '''
+    Create and compile a joint model that combines structural and functional features.
+
+    :param float dropout: The dropout rate for regularization.
+    :param int hidden_neurons: The number of neurons in each hidden layer.
+    :param int hidden_layers: The number of hidden layers.
+    :param bool model_selection: If True, the model is created for model selection purposes.
+
+    :return: The compiled joint model with Mean Absolute Error (MAE) as the loss function
+             and Adam optimizer with a learning rate of 0.01.
+    :rtype: keras.models.Model
+
     Create the joint model. It consists of two branches which are basically the structural and
-    functional model, with hyperparameters equal to the ones individually selected during model selection.
+    functional model, with hyperparameters equal to the ones individually
+    selected during model selection.
     These two branches are joined using a concatenate layer.
     After the concatenate layer, add a number of hidden layers equal to 'hidden_layers', each
-    one with a number of units equal to 'hidden_units'. A dropout equal to 'dropout' is also applied, and
-    a batch normalisation.
+    one with a number of units equal to 'hidden_units'.
+    A dropout equal to 'dropout' is also applied, and a batch normalisation.
 
     The input 'model_selection' assumes categorical values, and it indicates if the created model
-    is to be used for model selection purposes. This needs to be specified because scikit learn wrappers
-    used to do model selection don't support multi input models. So in this case a workaround was nedded:
-    the firs layer is a single layer which takes the concatenated structural and functional features,
-    then this layer is split through Lambda layers. At this point the structure is the same as
-    described before.
+    is to be used for model selection purposes.
+    This needs to be specified because scikit learn wrappers
+    employed to do model selection don't support multi input models.
+    So in this case a workaround was needed:
+    the firs layer is a single layer which takes the concatenated structural
+    and functional features, then this layer is split through Lambda layers.
+    At this point the structure is the same as described before.
 
-    Return the compiled joint model, using MAE as loss, and Adam with lr=0.001 as optimizer.
-.
+    The model is compiled using the Mean Absolute Error (MAE)
+    loss function and the Adam optimizer with a learning rate of 0.01.
     '''
+
     # load best hyperparams
     s_best_hyperparams, f_best_hyperparams = load_best_hyperparams()
 
@@ -175,12 +207,27 @@ def create_joint_model(dropout, hidden_neurons, hidden_layers, model_selection=F
 
 def load_model(model_type):
     '''
-    Load a saved keras model and compile it.
-    The input 'model_type' indicates which model to load:
-    either 'structural', 'functional' or 'joint'.
+    Load a saved Keras model and compile it.
 
-    Return the compiled model
+    :param str model_type: The type of model to load ('structural', 'functional', or 'joint').
+
+    :return: The compiled Keras model.
+    :rtype: keras.models.Model
+
+    This function loads a saved Keras model and its weights based on the provided
+    'model_type' (either 'structural', 'functional', or 'joint'). The model is then
+    compiled using the Mean Absolute Error (MAE) loss function and the Adam optimizer
+    with a learning rate of 0.001.
+
+    Example:
+    ```python
+    # Load a saved functional model
+    functional_model = load_model('functional')
+    ```
+
+    Note: Make sure that the saved model files are present in the specified paths.
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:

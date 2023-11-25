@@ -14,9 +14,18 @@ ROOT_PATH = Path(__file__).parent.parent.parent
 
 def load_dataset(dataset_name):
     '''
-    Load the dataset as pandas dataframes and return 2 different dataframes:
-    - 1 for the TD group
-    - 1 for the ASD group
+    Load the dataset as pandas dataframes and return two different dataframes:
+    - One for the TD group
+    - One for the ASD group
+
+    :param str dataset_name: The name of the dataset.
+
+    :return: Two pandas dataframes for the TD and ASD groups, respectively.
+    :rtype: tuple
+
+    This function loads a dataset from a CSV file into a pandas dataframe. It then
+    separates the dataframe into two based on the diagnostic group (TD or ASD).
+    The resulting dataframes are returned as a tuple.
     '''
     #import dataset
     try:
@@ -34,10 +43,19 @@ def load_dataset(dataset_name):
 
 def preprocessing(df):
     '''
-    takes in input a pandas dataframe
-    it returns a numpy array of the features used as input for the learning process
-    moreover, it applies a RobustScaler preprocessing to the input features
+    Takes in input a pandas dataframe and returns a numpy array of the features used
+    as input for the learning process. Additionally, it applies a RobustScaler preprocessing
+    to the input features.
+
+    :param pandas.DataFrame df: The input dataframe.
+
+    :return: The preprocessed numpy array of features.
+    :rtype: numpy.ndarray
+
+    This function extracts relevant features from the input dataframe, converts them
+    to a numpy array, and applies RobustScaler for preprocessing to handle outliers.
     '''
+
     features = df.drop(['FILE_ID','Database_Abide','SITE','AGE_AT_SCAN','DX_GROUP'],axis=1)
     features=features.apply(lambda x: x.astype(float))
     features = np.array(features)
@@ -51,7 +69,24 @@ def load_train_test(split=0.3, seed=7):
     '''
     Load both the structural and functional datasets.
     Apply preprocessing to input features.
-    Split the data in train and test, according to the "split" variable
+    Split the data into train and test according to the "split" variable.
+
+    :param float split: The ratio of the dataset to include in the test split.
+    :param int random_state: Seed for the random state of the train_test_split function
+                             (for reproducibility).
+
+    :return: Tuple containing training and test sets for structural and functional data.
+    :rtype: tuple
+
+    This function loads both structural and functional datasets, preprocesses the input
+    features using the `preprocessing` function, and then splits the data into training
+    and testing sets.
+
+    Example:
+    ```python
+    # Load and split the structural and functional datasets
+    x_s_tr, x_s_te, y_s_tr, y_s_te, x_f_tr, x_f_te, y_f_tr, y_f_te = load_train_test()
+    ```
     '''
 
     df_s_td = load_dataset(dataset_name='Harmonized_structural_features.csv')[0]
