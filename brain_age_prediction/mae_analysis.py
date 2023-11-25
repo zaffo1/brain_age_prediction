@@ -14,7 +14,6 @@ from brain_age_prediction.utils.line import line
 from brain_age_prediction.utils.custom_models import load_model
 from brain_age_prediction.utils.chek_model_type import check_model_type
 
-
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7
 
@@ -78,38 +77,6 @@ def compute_mae(model,df_s,df_f,model_type):
     print(f'TD TEST MAE = {mae}')
     return ae
 
-
-def empirical_p_value(group1, group2, num_permutations=100000):
-    '''
-    empirical p value
-    '''
-    # Observed test statistic (difference in means)
-    observed_statistic = np.mean(group2) - np.mean(group1)
-
-    # Initialize array to store permuted test statistics
-    permuted_statistics = np.zeros(num_permutations)
-
-    # Perform permutations and calculate permuted test statistics
-    for i in range(num_permutations):
-        # Concatenate and randomly permute the data
-        combined_data = np.concatenate((group1, group2))
-        np.random.shuffle(combined_data)
-
-        # Split permuted data into two groups
-        permuted_group1 = combined_data[:len(group1)]
-        permuted_group2 = combined_data[len(group1):]
-
-        # Calculate test statistic for permuted data
-        permuted_statistic = np.mean(permuted_group2) - np.mean(permuted_group1)
-
-        # Store permuted statistic
-        permuted_statistics[i] = permuted_statistic
-
-    # Calculate p-value
-    p_value = np.sum(np.abs(permuted_statistics) >= np.abs(observed_statistic)) / num_permutations
-
-    print("Empirical p-value:", p_value)
-    return p_value
 
 def plot_distributions(ae_1, ae_2, label1, label2):
     '''
