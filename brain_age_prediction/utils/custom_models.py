@@ -219,12 +219,6 @@ def load_model(model_type):
     compiled using the Mean Absolute Error (MAE) loss function and the Adam optimizer
     with a learning rate of 0.001.
 
-    Example:
-    ```python
-    # Load a saved functional model
-    functional_model = load_model('functional')
-    ```
-
     Note: Make sure that the saved model files are present in the specified paths.
     '''
 

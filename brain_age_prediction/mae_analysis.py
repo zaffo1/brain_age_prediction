@@ -6,13 +6,12 @@ import sys
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy.stats import pearsonr, ttest_ind, shapiro
 from sklearn.model_selection import train_test_split
 from brain_age_prediction.utils.loading_data import load_dataset, preprocessing
-from brain_age_prediction.utils.line import line
 from brain_age_prediction.utils.custom_models import load_model
 from brain_age_prediction.utils.chek_model_type import check_model_type
+from brain_age_prediction.utils.stats_utils import empirical_p_value
+
 
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7
@@ -35,10 +34,18 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 def compute_mae(model,df_s,df_f,model_type):
     '''
-    function that performs an analysis of the results obtained using the
-    regression models obtained.
-    In particular it computes MAE.
+    Analyze regression model results by computing Mean Absolute Error (MAE).
+
+    :param keras.models.Model model: Trained regression model.
+    :param pandas.DataFrame df_s: DataFrame for structural features.
+    :param pandas.DataFrame df_f: DataFrame for functional features.
+    :param str model_type: Model type ('structural', 'functional', or 'joint').
+
+    This function preprocesses input data, splits it into test sets,
+    and evaluates the model's performance by computing the Mean Absolute Error (MAE).
+    The results are printed, and absolute errors are returned.
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:
@@ -64,9 +71,7 @@ def compute_mae(model,df_s,df_f,model_type):
         x_test = [x_f_test,x_s_test]
 
     #evaluate model
-    score = model.evaluate(x_test, y_test, verbose=0)
-
-    print(f'TD TEST LOSS = {score}')
+    print(f'TD TEST LOSS = {model.evaluate(x_test, y_test, verbose=0)}')
 
     y_pred = model.predict(x_test)
     print(y_pred.shape)
@@ -80,16 +85,26 @@ def compute_mae(model,df_s,df_f,model_type):
 
 def plot_distributions(ae_1, ae_2, label1, label2):
     '''
-    plot PAD distributions
+    Plot an histogram of Absolute Error (AE) distributions.
+
+    :param numpy.ndarray ae_1: Absolute errors from the first model.
+    :param numpy.ndarray ae_2: Absolute errors from the second model.
+    :param str label1: Label for the first model.
+    :param str label2: Label for the second model.
+
+    This function plots the histogram of the absolute error distributions for two models,
+    calculates the empirical p-value, and saves the plot.
     '''
+
     p_val = empirical_p_value(ae_1, ae_2)
 
     plt.figure('AE distributions', figsize=[9,7])
 
-    bins = plt.hist(ae_1,bins=30,color='purple',
-                     alpha=0.5, density=True, label= f'{label1.capitalize()} (mean = {np.mean(ae_1):.3})')[1]
-    plt.hist(ae_2,bins=bins,color='green',
-              alpha=0.5, density=True, label= f'{label2.capitalize()} (mean = {np.mean(ae_2):.3})')
+    bins = plt.hist(ae_1,bins=30,color='purple', alpha=0.5, density=True,
+                     label= f'{label1.capitalize()} (mean = {np.mean(ae_1):.3})')[1]
+
+    plt.hist(ae_2,bins=bins,color='green', alpha=0.5, density=True,
+              label= f'{label2.capitalize()} (mean = {np.mean(ae_2):.3})')
 
     plt.xlabel('Absolute Error [years]')
     plt.ylabel('Relative Frequency')
@@ -97,6 +112,7 @@ def plot_distributions(ae_1, ae_2, label1, label2):
 
     plt.title(f' Absolute Error Distributions\n'
               f' {label1.capitalize()} vs {label2.capitalize()} model (empirical p={p_val:.2})')
+
     plt.savefig(os.path.join(
         ROOT_PATH,'brain_age_prediction','plots',f'{label1}_vs_{label2}_distribution.pdf'))
 

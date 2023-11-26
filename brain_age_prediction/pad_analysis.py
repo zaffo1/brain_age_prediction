@@ -35,10 +35,16 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 def td_analysis(model,df_s,df_f,model_type):
     '''
-    function that performs an analysis of the results obtained using the
-    regression models obtained.
-    In particular: ..........
+    Analyze TD data using the regression model.
+
+    :param keras.models.Sequential model: The trained Keras regression model.
+    :param pd.DataFrame df_s: Dataframe containing structural features for TD group.
+    :param pd.DataFrame df_f: Dataframe containing functional features for TD group.
+    :param str model_type: Type of the model ('structural', 'functional', or 'joint').
+    :return: Predicted Age Difference (PAD) for TD group.
+    :rtype: numpy.ndarray
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:
@@ -90,8 +96,16 @@ def td_analysis(model,df_s,df_f,model_type):
 
 def asd_analysis(model,df_s,df_f,model_type):
     '''
-    Analysis of the ASD data
+    Analyze ASD data using the regression model.
+
+    :param keras.models.Sequential model: The trained Keras regression model.
+    :param pd.DataFrame df_s: Dataframe containing structural features for ASD group.
+    :param pd.DataFrame df_f: Dataframe containing functional features for ASD group.
+    :param str model_type: Type of the model ('structural', 'functional', or 'joint').
+    :return: Predicted Age Difference (PAD) for ASD group.
+    :rtype: numpy.ndarray
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:
@@ -138,8 +152,13 @@ def asd_analysis(model,df_s,df_f,model_type):
 
 def plot_distributions(pad_c_td, pad_c_asd, model_type):
     '''
-    plot PAD distributions
+    Plot Predicted Age Difference (PAD) distributions.
+
+    :param numpy.ndarray pad_c_td: PAD for TD group.
+    :param numpy.ndarray pad_c_asd: PAD for ASD group.
+    :param str model_type: Type of the model ('structural', 'functional', or 'joint').
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:

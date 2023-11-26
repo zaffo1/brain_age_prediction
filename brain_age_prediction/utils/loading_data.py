@@ -81,12 +81,6 @@ def load_train_test(split=0.3, seed=7):
     This function loads both structural and functional datasets, preprocesses the input
     features using the `preprocessing` function, and then splits the data into training
     and testing sets.
-
-    Example:
-    ```python
-    # Load and split the structural and functional datasets
-    x_s_tr, x_s_te, y_s_tr, y_s_te, x_f_tr, x_f_te, y_f_tr, y_f_te = load_train_test()
-    ```
     '''
 
     df_s_td = load_dataset(dataset_name='Harmonized_structural_features.csv')[0]

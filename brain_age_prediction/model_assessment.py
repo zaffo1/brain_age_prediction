@@ -34,15 +34,13 @@ plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the figure title
 
 def load_model_architecture(model_type):
     '''
-    Depending on the type of model given in input,
-    load it with the best hyperparameters found and
-    return the loaded model itself
+    Load a saved Keras model architecture with the best hyperparameters found.
 
-    :param string model_type: string indicating the model type
-                             ('structural', 'functional' or 'joint') to load
-    :return: The dictionary of relevant features
-    :rtype: dictionary
+    :param str model_type: Type of the model ('structural', 'functional', or 'joint').
+    :return: The loaded Keras model.
+    :rtype: keras.models.Sequential
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:
@@ -77,9 +75,12 @@ def load_model_architecture(model_type):
 
 def save_model(model,model_type):
     '''
-    save model to disk
-    takes in input the model
+    Save the Keras model architecture and weights to disk.
+
+    :param keras.models.Sequential model: The Keras model to be saved.
+    :param str model_type: Type of the model ('structural', 'functional', or 'joint').
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:
@@ -108,7 +109,10 @@ def save_model(model,model_type):
 
 def plot_loss(history, model_type):
     '''
-    plot the loss during training, and save training curves to file
+    Plot the training and test loss during model training.
+
+    :param dict history: The training history obtained from model training.
+    :param str model_type: Type of the model ('structural', 'functional', or 'joint').
     '''
     try:
         check_model_type(model_type)
@@ -135,11 +139,16 @@ def plot_loss(history, model_type):
 
 def retrain(x_train,y_train,x_test,y_test,model_type):
     '''
-    Re-train the best model obtained throug model selection
-    on all the available data (of the training set). Then evaluate
-    the model on the test set.
-    Finally save the model to file
+    Re-train the best model obtained through model selection on all the available data
+    of the training set. Then evaluate the model on the test set. Finally, save the model to file.
+
+    :param numpy.ndarray x_train: Input features of the training set.
+    :param numpy.ndarray y_train: Targets of the training set.
+    :param numpy.ndarray x_test: Input features of the test set.
+    :param numpy.ndarray y_test: Targets of the test set.
+    :param str model_type: Type of the model ('structural', 'functional', or 'joint').
     '''
+
     try:
         check_model_type(model_type)
     except AssertionError as e:
