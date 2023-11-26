@@ -17,7 +17,18 @@ class Tests(unittest.TestCase):
 
     def test_structural_dataset(self):
         '''
-        check shape of structural dataset
+        Check the shape of the structural dataset.
+
+        This test ensures that the loaded structural dataset has the expected shape.
+        It compares the shape of the dataset for both the TD and ASD groups.
+
+        Sample dataset (expected shape):
+        - TD: (0, 226)
+        - ASD: (10, 226)
+
+        Complete dataset (expected shape):
+        - TD: (703, 226)
+        - ASD: (680, 226)
         '''
 
         df_s_td, df_s_asd = load_dataset(dataset_name='sample_Harmonized_structural_features.csv')
@@ -34,7 +45,18 @@ class Tests(unittest.TestCase):
 
     def test_functional_dataset(self):
         '''
-        check shape of functional dataset
+        Check the shape of the functional dataset.
+
+        This test ensures that the loaded functional dataset has the expected shape.
+        It compares the shape of the dataset for both the TD and ASD groups.
+
+        Sample dataset (expected shape):
+        - TD: (0, 5258)
+        - ASD: (10, 5258)
+
+        Complete dataset (expected shape):
+        - TD: (703, 5258)
+        - ASD: (680, 5258)
         '''
 
         df_f_td, df_f_asd = load_dataset(dataset_name='sample_Harmonized_functional_features.csv')
