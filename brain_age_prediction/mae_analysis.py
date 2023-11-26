@@ -113,7 +113,7 @@ def plot_distributions(ae_1, ae_2, label1, label2):
               f' {label1.capitalize()} vs {label2.capitalize()} model (empirical p={p_val:.2})')
 
     plt.savefig(os.path.join(
-        ROOT_PATH,'brain_age_prediction','plots',f'{label1}_vs_{label2}_distribution.pdf'))
+        ROOT_PATH,'brain_age_prediction','plots',f'mae_{label1}_vs_{label2}.pdf'))
 
     plt.show()
 
