@@ -91,12 +91,8 @@ def load_train_test(split=0.3, seed=7):
     x_s = preprocessing(df_s_td)
     x_f = preprocessing(df_f_td)
 
-    #load targets
-    #check if targets are equal (UNIT TEST)
-    y_s = df_s_td['AGE_AT_SCAN']
-    y_f = df_f_td['AGE_AT_SCAN']
-    print(y_s.equals(y_f))
-    y = np.array(y_s)
+    #load targets (functional and structural are the same)
+    y = np.array(df_s_td['AGE_AT_SCAN'])
 
     # shuffle and split training and test sets
     x_s_tr, x_s_te, y_s_tr, y_s_te = train_test_split(x_s, y, test_size=split,

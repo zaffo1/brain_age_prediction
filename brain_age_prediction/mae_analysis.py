@@ -74,8 +74,7 @@ def compute_mae(model,df_s,df_f,model_type):
     print(f'TD TEST LOSS = {model.evaluate(x_test, y_test, verbose=0)}')
 
     y_pred = model.predict(x_test)
-    print(y_pred.shape)
-    print(y_test.shape)
+
     ae = np.abs(y_pred.ravel() - y_test.ravel())
     mae = np.mean(np.abs(y_pred.ravel() - y_test.ravel()))
 
