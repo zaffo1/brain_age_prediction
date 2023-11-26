@@ -1,5 +1,5 @@
 '''
-Study the distribution of absolute errors to assert their significance
+Study the distribution of absolute errors to assert their significance.
 '''
 import os
 import sys
