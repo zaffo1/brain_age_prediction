@@ -5,4 +5,5 @@ brain_age_prediction
    :maxdepth: 4
 
    intro
+   installation
    brain_age_prediction
