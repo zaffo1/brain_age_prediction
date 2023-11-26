@@ -10,3 +10,6 @@ By comparing chronological age with the predicted age we can estimate a PAD (Pre
 
 # Documentation
 The documentation for this project is hosted on [readthedocs](https://brain-age-prediction.readthedocs.io/en/latest/?badge=latest).
+
+# Installation
+Refer to this brief [installation guide](https://brain-age-prediction.readthedocs.io/en/latest/installation.html#installation-guide).
