@@ -16,9 +16,9 @@ from brain_age_prediction.utils.stats_utils import empirical_p_value, correlatio
 ROOT_PATH = Path(__file__).parent.parent
 SEED = 7
 
-SMALL_SIZE = 14
-MEDIUM_SIZE = 16
-BIGGER_SIZE = 22
+SMALL_SIZE = 16
+MEDIUM_SIZE = 17
+BIGGER_SIZE = 24
 
 plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
