@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from brain_age_prediction.utils.loading_data import load_dataset, preprocessing
-from brain_age_prediction.utils.line import line
 from brain_age_prediction.utils.custom_models import load_model
 from brain_age_prediction.utils.chek_model_type import check_model_type
 from brain_age_prediction.utils.stats_utils import empirical_p_value, correlation
