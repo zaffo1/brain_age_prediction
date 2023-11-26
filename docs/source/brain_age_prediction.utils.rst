@@ -20,14 +20,6 @@ brain\_age\_prediction.utils.custom\_models module
    :undoc-members:
    :show-inheritance:
 
-brain\_age\_prediction.utils.line module
-----------------------------------------
-
-.. automodule:: brain_age_prediction.utils.line
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 brain\_age\_prediction.utils.loading\_data module
 -------------------------------------------------
 
