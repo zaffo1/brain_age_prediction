@@ -169,9 +169,9 @@ def plot_distributions(pad_c_td, pad_c_asd, model_type):
     plt.figure('PAD distributions', figsize=[9,7])
 
     bins = plt.hist(pad_c_td,bins=30,color='blue',
-                     alpha=0.5, density=True, label= f'Model 1 (mean = {np.mean(pad_c_td):.2} years)')[1]
+                     alpha=0.5, density=True, label= f'TD (mean = {np.mean(pad_c_td):.2} years)')[1]
     plt.hist(pad_c_asd,bins=bins,color='red',
-              alpha=0.5, density=True, label= f'Model 2 (mean = {np.mean(pad_c_asd):.2} years)')
+              alpha=0.5, density=True, label= f'ASD (mean = {np.mean(pad_c_asd):.2} years)')
     plt.xlabel('PAD [years]')
     plt.ylabel('Relative Frequency')
     plt.legend()
