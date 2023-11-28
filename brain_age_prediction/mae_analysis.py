@@ -94,7 +94,7 @@ def plot_distributions(ae_1, ae_2, label1, label2):
     This function plots the histogram of the absolute error distributions for two models,
     calculates the empirical p-value, and saves the plot.
     '''
-
+    print(f'{label1.capitalize()} vs {label2.capitalize()}')
     p_val = empirical_p_value(ae_1, ae_2)
 
     plt.figure('AE distributions', figsize=[9,7])
@@ -145,6 +145,6 @@ if __name__ == "__main__":
     ae_j = compute_mae(joint_model,df_s_td,df_f_td,model_type='joint')
 
     #compare distributions of absolute errors
-    plot_distributions(ae_s,ae_j,'structural','joint')
     plot_distributions(ae_s,ae_f,'structural','functional')
+    plot_distributions(ae_s,ae_j,'structural','joint')
     plot_distributions(ae_f,ae_j,'functional','joint')
