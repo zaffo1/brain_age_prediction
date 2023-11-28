@@ -6,7 +6,8 @@ from scipy.stats import pearsonr
 
 def empirical_p_value(group1, group2, num_permutations=100000):
     '''
-    Calculate the empirical p-value for the difference in means between two groups using permutation testing.
+    Calculate the empirical p-value for the difference in means
+    between two groups using permutation testing.
 
     :param array-like group1: Data for the first group.
     :param array-like group2: Data for the second group.
@@ -23,7 +24,8 @@ def empirical_p_value(group1, group2, num_permutations=100000):
     The function generates permuted test statistics by randomly permuting
     the data between the two groups and calculates the difference in means for each permutation.
     The empirical p-value is then calculated as the proportion
-    of permuted differences in means that are greater than or equal to the observed difference in means.
+    of permuted differences in means that are greater than
+    or equal to the observed difference in means.
     '''
 
     # Observed test statistic (difference in means)
@@ -62,13 +64,15 @@ def correlation(x,y,permutation_number=1000):
 
     :param array-like x: First array for correlation.
     :param array-like y: Second array for correlation.
-    :param int permutation_number: Number of permutations for computing the empirical p-value. Default is 1000.
+    :param int permutation_number: Number of permutations for computing the empirical p-value.
+                                   Default is 1000.
 
     :return: Tuple containing the Pearson correlation coefficient and its empirical p-value.
     :rtype: tuple
 
     This function calculates the Pearson correlation coefficient (r) between two arrays 'x' and 'y'.
-    Additionally, it performs a permutation test to estimate the empirical p-value of the correlation coefficient.
+    Additionally, it performs a permutation test to estimate
+    the empirical p-value of the correlation coefficient.
     '''
     r = pearsonr(x,y)[0]
     #Copy one of the features:

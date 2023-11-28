@@ -58,10 +58,8 @@ def td_analysis(model,df_s,df_f,model_type):
 
     if model_type == 'structural':
         x_test = x_s_test
-
     if model_type == 'functional':
         x_test = x_f_test
-
     if model_type == 'joint':
         x_test = [x_f_test,x_s_test]
 
@@ -137,7 +135,7 @@ def asd_analysis(model,df_s,df_f,model_type):
     plt.plot(x,x, color = 'grey', linestyle='--')
 
     plt.xlabel('Chronological Age [years]')
-    plt.ylabel('Predicted Age (corrected) [years]')
+    plt.ylabel('Predicted Age [years]')
 
     plt.legend()
     plt.savefig(os.path.join(
@@ -146,12 +144,12 @@ def asd_analysis(model,df_s,df_f,model_type):
     return pad_asd
 
 
-def plot_distributions(pad_c_td, pad_c_asd, model_type):
+def plot_distributions(pad_td, pad_asd, model_type):
     '''
     Plot Predicted Age Difference (PAD) distributions.
 
-    :param numpy.ndarray pad_c_td: PAD for TD group.
-    :param numpy.ndarray pad_c_asd: PAD for ASD group.
+    :param numpy.ndarray pad_td: PAD for TD group.
+    :param numpy.ndarray pad_asd: PAD for ASD group.
     :param str model_type: Type of the model ('structural', 'functional', or 'joint').
     '''
 
@@ -161,17 +159,17 @@ def plot_distributions(pad_c_td, pad_c_asd, model_type):
         print(e)
         sys.exit(1)
 
-    print(f'variance td: {np.var(pad_c_td)}, variance asd: {np.var(pad_c_asd)}')
+    print(f'variance td: {np.var(pad_td)}, variance asd: {np.var(pad_asd)}')
 
     # empirical p value
-    p_val = empirical_p_value(pad_c_td, pad_c_asd)
+    p_val = empirical_p_value(pad_td, pad_asd)
 
     plt.figure('PAD distributions', figsize=[9,7])
 
-    bins = plt.hist(pad_c_td,bins=30,color='blue',
-                     alpha=0.5, density=True, label= f'TD (test) (mean = {np.mean(pad_c_td):.2} years)')[1]
-    plt.hist(pad_c_asd,bins=bins,color='red',
-              alpha=0.5, density=True, label= f'ASD (mean = {np.mean(pad_c_asd):.2} years)')
+    bins = plt.hist(pad_td, bins=30, color='blue', alpha=0.5, density=True,
+                     label= f'TD (test) (mean = {np.mean(pad_td):.2} years)')[1]
+    plt.hist(pad_asd,bins=bins,color='red',
+              alpha=0.5, density=True, label= f'ASD (mean = {np.mean(pad_asd):.2} years)')
     plt.xlabel('PAD [years]')
     plt.ylabel('Relative Frequency')
     plt.legend()
@@ -193,26 +191,9 @@ if __name__ == "__main__":
     df_s_td, df_s_asd = load_dataset(dataset_name='Harmonized_structural_features.csv')
     df_f_td, df_f_asd = load_dataset(dataset_name='Harmonized_functional_features.csv')
 
-    #structural model
-    print('--------STRUCTURAL MODEL---------')
-    structural_model = load_model(model_type='structural')
-
-    pad_td = td_analysis(structural_model,df_s_td,df_f_td,model_type='structural')
-    pad_asd = asd_analysis(structural_model,df_s_asd,df_f_asd,model_type='structural')
-    plot_distributions(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='structural')
-
-    #functional model
-    print('--------FUNCTIONAL MODEL---------')
-    functional_model = load_model(model_type='functional')
-
-    pad_td = td_analysis(functional_model,df_s_td,df_f_td,model_type='functional')
-    pad_asd = asd_analysis(functional_model,df_s_asd,df_f_asd,model_type='functional')
-    plot_distributions(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='functional')
-
-    #joint model
-    print('--------JOINT MODEL---------')
-    joint_model = load_model(model_type='joint')
-
-    pad_td = td_analysis(joint_model,df_s_td,df_f_td,model_type='joint')
-    pad_asd = asd_analysis(joint_model,df_s_asd,df_f_asd,model_type='joint')
-    plot_distributions(pad_c_asd=pad_asd, pad_c_td=pad_td,model_type='joint')
+    for model_name in ('structural','functional','joint'):
+        print(model_name.capitalize())
+        mod = load_model(model_type=model_name)
+        td_pad = td_analysis(mod,df_s_td,df_f_td,model_type=model_name)
+        asd_pad = asd_analysis(mod,df_s_asd,df_f_asd,model_type=model_name)
+        plot_distributions(pad_asd=asd_pad, pad_td=td_pad,model_type=model_name)
