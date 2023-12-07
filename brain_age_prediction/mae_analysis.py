@@ -1,5 +1,6 @@
 '''
-Study the distribution of absolute errors to assert their significance.
+Study the distribution of absolute errors for the three different
+models and study the significance of the differences in means.
 '''
 import os
 import sys

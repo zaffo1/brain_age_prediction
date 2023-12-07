@@ -1,6 +1,8 @@
 '''
-Given the ML models already trained,
-Apply them to our analysis
+Given the ML models already trained on the TD group, apply
+them to the study of ASD subject.
+In particular, study the Predicted Age Difference (PAD) distributions
+for the different models, and look for significant differences.
 '''
 import os
 import sys
