@@ -17,6 +17,4 @@ a joint model that takes in input both structural and functional features in a m
 We would like to compare the results of these three models, in order to understand the impact of different data
 on our task.
 
-Contacts
-**********
-Contact me at l.zaffina@studenti.unipi.it
+

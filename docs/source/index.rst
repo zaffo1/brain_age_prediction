@@ -11,6 +11,9 @@ Computing Methods for Experimental Physics and Data Analysis course.
 
 The project repository is hosted `here <https://github.com/zaffo1/brain_age_prediction>`_.
 
+Contacts
+**********
+Contact me at l.zaffina@studenti.unipi.it
 
 .. toctree::
    :maxdepth: 2
